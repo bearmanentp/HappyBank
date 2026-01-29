@@ -49,7 +49,9 @@
         .n-btn { padding: 25px; font-size: 28px; font-weight: 800; background: var(--white); border-radius: 18px; text-align: center; box-shadow: 0 5px 0 #E5E8EB; cursor: pointer; }
     </style>
 </head>
-<body onclick="initAudio()"> <div class="atm-container">
+<body onclick="initAudio()">
+
+<div class="atm-container">
     <nav class="atm-nav">
         <button id="nav-back" class="back-btn" onclick="goBack()">←</button>
         <div class="nav-title">HAPPY BANK ATM</div>
@@ -158,7 +160,6 @@
     let audioCtx;
     let voices = [];
 
-    // 오디오 컨텍스트 초기화 (사용자 클릭 시 실행됨)
     function initAudio() { 
         if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
         if(voices.length === 0) voices = window.speechSynthesis.getVoices();
@@ -174,26 +175,18 @@
         o.start(); o.stop(audioCtx.currentTime + d); 
     }
 
-    // [보정된 TTS 함수]
     function speak(text) {
         window.speechSynthesis.cancel(); 
         const msg = new SpeechSynthesisUtterance(text);
-        
-        // 목소리 목록 다시 확인
         if (voices.length === 0) voices = window.speechSynthesis.getVoices();
-        
-        // 여성 목소리 찾기 (Google 한국어 등)
         const femaleVoice = voices.find(v => v.lang.includes('ko') && (v.name.includes('Google') || v.name.includes('Female') || v.name.includes('Heami')));
-        
         if (femaleVoice) msg.voice = femaleVoice;
         msg.lang = 'ko-KR';
         msg.rate = 1.0; 
         msg.pitch = 1.1;
-        
         window.speechSynthesis.speak(msg);
     }
 
-    // 목소리 목록이 변경될 때 갱신 (크롬 필수)
     window.speechSynthesis.onvoiceschanged = () => { voices = window.speechSynthesis.getVoices(); };
 
     let userData = JSON.parse(localStorage.getItem('happy_atm_data'));
@@ -205,6 +198,9 @@
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('scr-'+id).classList.add('active');
         beep(800, 0.1);
+        
+        // 화면 전환 시 초기화
+        if(id === 'pw') pReset();
     }
 
     function goBack() {
@@ -263,25 +259,45 @@
     function kCheck() {
         if(Hangul.assemble(nArr) === userData.name) {
             move('pw'); 
-            speak("비밀번호 4자리를 입력하세요.");
-        } else { speak("이름이 일치하지 않습니다."); }
+            speak("비밀번호 4자리를 입력하고 확인 버튼을 눌러주세요.");
+        } else { speak("이름이 일치하지 않습니다. 다시 입력해 주세요."); }
     }
 
+    // [비밀번호 로직 수정]
     let pStr = "";
     function pPress(n) {
         if(pStr.length < 4) {
-            pStr += n; beep(1100, 0.05);
-            document.querySelectorAll('.p-dot')[pStr.length-1].style.background = "var(--primary)";
+            pStr += n; 
+            beep(1100, 0.05);
+            updateDots();
         }
-        if(pStr.length === 4) setTimeout(() => pCheck(), 300);
     }
-    function pReset() { pStr = ""; document.querySelectorAll('.p-dot').forEach(d => d.style.background = "#D1D6DB"); }
+    
+    function pReset() { 
+        pStr = ""; 
+        updateDots();
+    }
+    
+    function updateDots() {
+        const dots = document.querySelectorAll('.p-dot');
+        dots.forEach((dot, idx) => {
+            dot.style.background = idx < pStr.length ? "var(--primary)" : "#D1D6DB";
+        });
+    }
+
     function pCheck() {
+        // 확인 버튼 클릭 시에만 검증
+        if(pStr.length < 4) {
+            speak("비밀번호 4자리를 모두 입력해 주세요.");
+            return;
+        }
+
+        // 비밀번호 검증 (설정 안했으면 통과, 했으면 일치여부 확인)
         if(!userData.pw || pStr === userData.pw) {
             speak("인증되었습니다. 명세표를 출력합니다.");
             finish();
         } else { 
-            speak("비밀번호가 틀렸습니다."); 
+            speak("비밀번호가 틀렸습니다. 다시 입력해 주세요."); 
             pReset(); 
         }
     }
