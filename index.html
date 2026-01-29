@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>효도은행 ATM</title>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; background-color: #f4f7fa; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .atm-container { width: 360px; height: 640px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        
+        /* Header */
+        .header { background: #0046ff; color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 1.2rem; }
+        
+        /* Main Content */
+        .content { flex: 1; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .user-info { font-size: 1.4rem; margin-bottom: 10px; color: #333; }
+        .main-msg { font-size: 1rem; color: #666; margin-bottom: 40px; line-height: 1.5; }
+        
+        /* Button */
+        .withdraw-btn { background: #0046ff; color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s; box-shadow: 0 5px 15px rgba(0,70,255,0.3); }
+        .withdraw-btn:active { transform: scale(0.95); }
+
+        /* Receipt/Coupon Modal (Hidden by default) */
+        #receipt { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; background: white; border: 1px solid #ddd; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.2); z-index: 10; border-top: 8px dashed #0046ff; }
+        .receipt-title { font-weight: bold; font-size: 1.1rem; border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 15px; }
+        .receipt-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 0.9rem; }
+        .barcode { width: 100%; height: 60px; background: repeating-linear-gradient(90deg, #000, #000 2px, #fff 2px, #fff 5px); margin-top: 20px; }
+        .coupon-code { font-family: monospace; font-weight: bold; margin-top: 5px; color: #555; }
+        
+        .loading { display: none; font-weight: bold; color: #0046ff; }
+    </style>
+</head>
+<body>
+
+<div class="atm-container">
+    <div class="header">🏛️ 효도은행 (Hyo-do Bank)</div>
+    
+    <div class="content" id="main-ui">
+        <div class="user-info"><b>김철수 & 이영희</b> 고객님</div>
+        <div class="main-msg">언제나 든든한 버팀목이 되어주셔서 감사합니다.<br>준비된 사랑을 인출하시겠습니까?</div>
+        
+        <button class="withdraw-btn" onclick="startWithdraw()">용돈 인출하기</button>
+        <div id="loader" class="loading">💰 현금을 세는 중...</div>
+    </div>
+
+    <div id="receipt">
+        <div class="receipt-title">🎫 효도 쿠폰 발행 완료</div>
+        <div class="receipt-row"><span>쿠폰명:</span> <strong>무제한 안마 & 용돈</strong></div>
+        <div class="receipt-row"><span>인출인:</span> <strong>최고의 자녀</strong></div>
+        <div class="receipt-row"><span>유효기간:</span> <strong>평생 무제한</strong></div>
+        <div style="margin-top: 15px; font-size: 0.85rem; color: #444; border-top: 1px solid #eee; pt-10px;">
+            "엄마 아빠, 항상 건강하고 사랑해요!"
+        </div>
+        <div class="barcode"></div>
+        <div class="coupon-code">LOVE-0508-2024</div>
+        <p style="font-size: 0.7rem; color: #999;">본 쿠폰은 효도은행 본점에서만 사용 가능합니다.</p>
+        <button onclick="location.reload()" style="margin-top:10px; border:none; background:none; color:#0046ff; cursor:pointer;">처음으로</button>
+    </div>
+</div>
+
+<script>
+    function startWithdraw() {
+        const btn = document.querySelector('.withdraw-btn');
+        const loader = document.getElementById('loader');
+        const receipt = document.getElementById('receipt');
+        
+        btn.style.display = 'none';
+        loader.style.display = 'block';
+
+        // 2초 뒤에 영수증 출력 (인출 소리 나는 척!)
+        setTimeout(() => {
+            loader.innerText = "✅ 인출 완료!";
+            setTimeout(() => {
+                receipt.style.display = 'block';
+            }, 500);
+        }, 2000);
+    }
+</script>
+
+</body>
+</html>
