@@ -2,186 +2,222 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>행복은행 ATM</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --main-blue: #003399; --gold: #d4af37; --bg-light: #f4f7fa; }
-        body { font-family: 'Pretendard', sans-serif; background-color: #1a1a1a; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        .phone-frame { width: 360px; height: 780px; background: white; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden; position: relative; display: flex; flex-direction: column; border: 8px solid #444; }
+        :root { --atm-blue: #002b7f; --atm-gold: #c5a059; --atm-silver: #e2e8f0; --atm-dark: #1a202c; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Pretendard', sans-serif; background: #000; overflow: hidden; }
         
-        .screen { flex: 1; display: none; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        /* 기기별 대응을 위한 컨테이너 */
+        .atm-frame { width: 100%; height: 100%; max-width: 500px; margin: 0 auto; background: #fff; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        
+        .screen { flex: 1; display: none; flex-direction: column; position: relative; overflow-y: auto; box-sizing: border-box; }
         .screen.active { display: flex; }
 
-        .header { background: var(--main-blue); color: white; padding: 18px; text-align: center; font-weight: bold; margin: -20px -20px 20px -20px; border-bottom: 4px solid var(--gold); }
-        .primary-btn { background: var(--main-blue); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
-        .withdraw-btn { background: radial-gradient(circle, var(--main-blue), #001a4d); color: white; border: 4px solid var(--gold); width: 160px; height: 160px; border-radius: 50%; font-size: 1.3rem; font-weight: bold; cursor: pointer; margin: 20px auto; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+        /* ATM 상단바 */
+        .atm-header { background: linear-gradient(to right, var(--atm-blue), #0044cc); color: white; padding: 20px; text-align: center; border-bottom: 5px solid var(--atm-gold); }
+        .atm-header h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; }
 
-        .pw-display { font-size: 2.2rem; letter-spacing: 12px; height: 50px; text-align: center; color: var(--main-blue); }
-        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .key { background: #f0f3f7; padding: 16px; border-radius: 10px; text-align: center; font-size: 1.3rem; cursor: pointer; font-weight: bold; border-bottom: 3px solid #ccc; }
+        /* 실제 인출기 버튼 느낌 */
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
+        .atm-btn { background: linear-gradient(145deg, #ffffff, #d1d5db); border: 2px solid #999; padding: 25px 10px; font-size: 1.1rem; font-weight: bold; color: var(--atm-blue); border-radius: 8px; cursor: pointer; box-shadow: 3px 3px 10px rgba(0,0,0,0.1); transition: 0.1s; }
+        .atm-btn:active { background: #cbd5e1; transform: translateY(2px); box-shadow: none; }
+        .atm-btn.main { background: var(--atm-blue); color: white; border: 2px solid var(--atm-gold); }
 
-        /* 명세표 스타일 */
-        #receipt-area { background: #fff; padding: 20px; border-top: 10px dashed var(--main-blue); font-size: 0.9rem; color: #333; }
-        .barcode { width: 100%; height: 50px; background: repeating-linear-gradient(90deg, #000 0, #000 2px, #fff 2px, #fff 5px); margin: 15px 0; }
-        #qrcode { display: flex; justify-content: center; margin: 15px 0; }
+        /* 입력 폼 */
+        .input-box { padding: 40px 20px; text-align: center; }
+        .atm-input { width: 80%; padding: 15px; font-size: 1.2rem; border: 3px solid var(--atm-blue); border-radius: 5px; text-align: center; outline: none; }
+
+        /* 키패드 */
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 20px; background: #eee; border-top: 2px solid #ccc; }
+        .key { background: #fff; padding: 20px; font-size: 1.5rem; font-weight: bold; border-radius: 5px; text-align: center; border-bottom: 4px solid #bbb; cursor: pointer; }
+        .key:active { transform: translateY(2px); border-bottom: none; }
+
+        /* 명세표 */
+        #receipt-capture { padding: 20px; background: #fff; }
+        #receipt-area { border: 1px solid #ddd; padding: 20px; position: relative; background: #fff; }
+        #receipt-area::before { content: ''; position: absolute; top: -10px; left: 0; right: 0; height: 10px; background: radial-gradient(circle, transparent 70%, white 70%) 0 0/20px 20px; }
+        .barcode { width: 100%; height: 60px; background: repeating-linear-gradient(90deg, #000 0, #000 2px, #fff 2px, #fff 5px); margin: 20px 0; }
         
-        .loading-wheel { border: 4px solid #f3f3f3; border-top: 4px solid var(--main-blue); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        
-        /* 설정창 스타일 */
-        .setup-group { margin-bottom: 10px; }
-        .setup-group label { font-size: 0.7rem; color: #666; font-weight: bold; }
-        .setup-group input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.8rem; }
+        .loading-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--atm-blue); color: white; }
+        .blink { animation: flash 1s infinite; font-weight: bold; color: var(--atm-gold); }
+        @keyframes flash { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <div class="phone-frame">
-        <div id="screen-setup" class="screen active">
-            <h2 style="color: var(--main-blue);">🏛️ 인출기 관리 설정</h2>
-            <div class="setup-group"><label>대상자 이름</label><input type="text" id="set-target" placeholder="예: 우리 엄마"></div>
-            <div class="setup-group"><label>환영 문구</label><input type="text" id="set-welcome" placeholder="예: 사랑해 엄마!"></div>
-            <div class="setup-group"><label>인출 항목</label><input type="text" id="set-coupon" placeholder="예: 효도 용돈 100만원"></div>
-            <div class="setup-group"><label>데이터(URL/코드)</label><input type="text" id="set-data" placeholder="예: LOVE-2024"></div>
-            <div class="setup-group"><label>하단 멘트</label><input type="text" id="set-bottom" placeholder="예: 항상 감사합니다"></div>
-            <div style="display:flex; gap:5px;" class="setup-group">
-                <div style="flex:1;"><label>타입</label><select id="set-type"><option value="barcode">바코드</option><option value="qr">QR</option></select></div>
-                <div style="flex:1;"><label>비밀번호</label><input type="password" id="set-pw-val" placeholder="4자리(선택)"></div>
-            </div>
-            <button class="primary-btn" onclick="startSystem()">ATM 시스템 시작</button>
-            <p style="font-size: 0.65rem; color: red; text-align: center;">* 시작 버튼을 누르면 안내 음성이 활성화됩니다.</p>
+<div class="atm-frame">
+    <div id="screen-setup" class="screen active" style="padding: 20px;">
+        <h2 style="color: var(--atm-blue); text-align:center;">🏛️ ATM 관리자 설정</h2>
+        <p style="font-size: 0.8rem; color: #666; text-align: center;">대상자에게 보여주기 전 미리 입력하세요.</p>
+        <div style="margin-top: 10px;">
+            <input type="text" id="set-target" placeholder="대상자 이름 (예: 김행복)" style="width:100%; padding:10px; margin-bottom:10px;">
+            <input type="text" id="set-coupon" placeholder="인출 항목 (예: 10만 원)" style="width:100%; padding:10px; margin-bottom:10px;">
+            <input type="text" id="set-data" placeholder="QR/바코드 데이터" style="width:100%; padding:10px; margin-bottom:10px;">
+            <input type="text" id="set-msg" placeholder="영수증 하단 멘트" style="width:100%; padding:10px; margin-bottom:10px;">
+            <select id="set-type" style="width:100%; padding:10px; margin-bottom:10px;">
+                <option value="barcode">바코드 타입</option>
+                <option value="qr">QR 코드 타입</option>
+            </select>
+            <input type="password" id="set-pw" placeholder="비밀번호 4자리 (선택)" style="width:100%; padding:10px;">
         </div>
+        <button class="primary-btn" style="margin-top:20px; padding:15px; background:var(--atm-blue); color:white; border:none; width:100%; font-weight:bold;" onclick="startAtm()">ATM 시스템 가동</button>
+    </div>
 
-        <div id="screen-main" class="screen">
-            <div class="header">🏦 행복은행 (Happiness Bank)</div>
-            <div style="text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center;">
-                <h3 id="view-target" style="font-size: 1.5rem;">고객님</h3>
-                <p id="view-welcome" style="color: #666;">환영합니다.</p>
-                <button class="withdraw-btn" onclick="goToPassword()">인출하기</button>
-                <p style="font-size: 0.8rem; color: var(--main-blue);">버튼을 눌러 거래를 시작하십시오</p>
+    <div id="screen-main" class="screen">
+        <div class="atm-header"><h1>🏦 행복은행</h1></div>
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center; padding:20px;">
+            <h2 style="color:var(--atm-blue);">원하시는 거래를<br>선택하여 주십시오</h2>
+            <div class="btn-grid">
+                <button class="atm-btn main" onclick="goToStepName()">예금인출 / 쿠폰</button>
+                <button class="atm-btn" onclick="alert('준비 중입니다.')">잔액조회</button>
+                <button class="atm-btn" onclick="alert('준비 중입니다.')">계좌이체</button>
+                <button class="atm-btn" onclick="alert('준비 중입니다.')">통장정리</button>
             </div>
-        </div>
-
-        <div id="screen-pw" class="screen">
-            <div class="header">비밀번호 입력</div>
-            <div style="text-align: center; flex:1; display:flex; flex-direction:column; justify-content:center;">
-                <div class="pw-display" id="pw-dots"></div>
-                <div class="keypad">
-                    <script>for(let i=1; i<=9; i++) document.write(`<div class="key" onclick="pressKey('${i}')">${i}</div>`);</script>
-                    <div class="key" style="visibility:hidden"></div><div class="key" onclick="pressKey('0')">0</div><div class="key" onclick="resetPw()" style="color:red; font-size:1rem;">정정</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="screen-loading" class="screen">
-            <div style="text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center;">
-                <div class="loading-wheel"></div>
-                <h3>행복을 인출 중입니다...</h3>
-            </div>
-        </div>
-
-        <div id="screen-result" class="screen">
-            <div class="header">거래 완료</div>
-            <div id="receipt-capture">
-                <div id="receipt-area">
-                    <div style="text-align:center; font-weight:bold; border-bottom:2px solid #333; margin-bottom:10px; padding-bottom:5px;">[ 행복은행 명세표 ]</div>
-                    <p>거래일시: <span id="res-date"></span></p>
-                    <p>인출항목: <strong id="res-coupon"></strong></p>
-                    <p>수 령 인: <strong id="res-target"></strong></p>
-                    <div id="qrcode" style="display:none;"></div>
-                    <div id="barcode" class="barcode" style="display:none;"></div>
-                    <div id="res-code-text" style="text-align:center; font-family:monospace; font-weight:bold;"></div>
-                    <p id="res-bottom" style="margin-top:15px; text-align:center; color:var(--main-blue); font-weight:bold;"></p>
-                </div>
-            </div>
-            <button class="primary-btn" onclick="downloadReceipt()" style="background:var(--gold);">명세표 이미지 저장</button>
-            <button class="primary-btn" onclick="location.reload()" style="background:#555;">처음으로</button>
+            <p class="blink">카드를 넣거나 화면을 눌러주세요</p>
         </div>
     </div>
 
-    <script>
-        // TTS 함수
-        function speak(text) {
-            window.speechSynthesis.cancel(); // 이전 음성 취소
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'ko-KR';
-            msg.rate = 1.0;
-            window.speechSynthesis.speak(msg);
-        }
+    <div id="screen-name" class="screen">
+        <div class="atm-header"><h1>고객 인증</h1></div>
+        <div class="input-box">
+            <h3>성함을 입력하여 주십시오</h3>
+            <input type="text" id="input-name" class="atm-input" placeholder="성함 입력">
+            <button class="primary-btn" style="margin-top:30px; padding:15px; background:var(--atm-blue); color:white; border:none; width:80%;" onclick="checkName()">확인</button>
+        </div>
+    </div>
 
-        function startSystem() {
-            if(!document.getElementById('set-target').value) return alert("이름을 입력하세요!");
-            speak("행복은행 ATM 시스템을 시작합니다. 인출하기 버튼을 눌러주세요.");
-            document.getElementById('view-target').innerText = document.getElementById('set-target').value + " 님";
-            document.getElementById('view-welcome').innerText = document.getElementById('set-welcome').value;
-            showScreen('screen-main');
-        }
+    <div id="screen-pw" class="screen">
+        <div class="atm-header"><h1>비밀번호 입력</h1></div>
+        <div style="flex:1; display:flex; flex-direction:column;">
+            <div style="text-align:center; padding:30px;">
+                <h3 id="target-greet">고객님</h3>
+                <p>비밀번호 4자리를 눌러주십시오</p>
+                <div style="font-size:3rem; letter-spacing:15px; color:var(--atm-blue);" id="pw-dots"></div>
+            </div>
+            <div class="keypad">
+                <script>for(let i=1; i<=9; i++) document.write(`<div class="key" onclick="pressKey('${i}')">${i}</div>`);</script>
+                <div class="key" style="background:#ddd;"></div><div class="key" onclick="pressKey('0')">0</div><div class="key" onclick="resetPw()" style="color:red; font-size:1.1rem;">정정</div>
+            </div>
+        </div>
+    </div>
 
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
+    <div id="screen-loading" class="screen">
+        <div class="loading-wrap">
+            <div style="border: 5px solid #fff; border-top: 5px solid var(--atm-gold); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;"></div>
+            <h2 style="margin-top:20px;">거래를 처리 중입니다...</h2>
+            <p>잠시만 기다려 주십시오.</p>
+        </div>
+    </div>
 
-        function goToPassword() {
-            speak("보안을 위해 비밀번호 4자리를 입력해 주십시오.");
+    <div id="screen-result" class="screen">
+        <div class="atm-header"><h1>거래 완료</h1></div>
+        <div style="padding:20px;">
+            <div id="receipt-capture">
+                <div id="receipt-area">
+                    <h3 style="text-align:center; border-bottom:2px solid #000; padding-bottom:10px;">[ 이용 명세표 ]</h3>
+                    <p>거래점: 행복은행 본점</p>
+                    <p>성함: <strong id="res-target"></strong> 님</p>
+                    <p>내용: <strong id="res-coupon"></strong></p>
+                    <div id="qrcode" style="display:none; justify-content:center;"></div>
+                    <div id="barcode" class="barcode" style="display:none;"></div>
+                    <div id="res-code" style="text-align:center; font-family:monospace; font-weight:bold;"></div>
+                    <p style="text-align:center; margin-top:20px; font-weight:bold; color:var(--atm-blue);" id="res-msg"></p>
+                </div>
+            </div>
+            <button class="primary-btn" style="background:var(--atm-gold); color:white; border:none; padding:15px; width:100%; margin-top:10px;" onclick="saveImg()">명세표 이미지 저장</button>
+            <button class="primary-btn" style="background:#666; color:white; border:none; padding:15px; width:100%; margin-top:10px;" onclick="location.reload()">종료</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(f, d, t='sine') {
+        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+        o.type = t; o.connect(g); g.connect(audioCtx.destination);
+        o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
+        o.start(); o.stop(audioCtx.currentTime + d);
+    }
+    function speak(t) { window.speechSynthesis.cancel(); const m = new SpeechSynthesisUtterance(t); m.lang = 'ko-KR'; window.speechSynthesis.speak(m); }
+
+    function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+    function startAtm() { 
+        if(!document.getElementById('set-target').value) return alert("설정에서 이름을 입력하세요.");
+        showScreen('screen-main'); 
+        speak("행복은행입니다. 거래를 선택해 주십시오.");
+    }
+
+    function goToStepName() { 
+        playSound(800, 0.1);
+        showScreen('screen-name'); 
+        speak("고객 인증을 위해 성함을 입력하여 주십시오.");
+    }
+
+    function checkName() {
+        const input = document.getElementById('input-name').value;
+        const target = document.getElementById('set-target').value;
+        if(input === target) {
+            playSound(1000, 0.1);
+            document.getElementById('target-greet').innerText = target + " 고객님";
             showScreen('screen-pw');
+            speak("비밀번호 4자리를 입력해 주십시오.");
+        } else {
+            speak("등록된 고객 정보와 일치하지 않습니다.");
+            alert("이름을 다시 확인해주세요.");
         }
+    }
 
-        let pwInput = "";
-        function pressKey(n) {
-            if(pwInput.length < 4) {
-                pwInput += n;
-                document.getElementById('pw-dots').innerText = "* ".repeat(pwInput.length);
-            }
-            if(pwInput.length === 4) {
-                const correct = document.getElementById('set-pw-val').value;
-                if(correct && pwInput !== correct) {
-                    speak("비밀번호가 일치하지 않습니다.");
-                    resetPw();
-                } else {
-                    speak("확인되었습니다. 잠시만 기다려 주십시오.");
-                    setTimeout(process, 500);
-                }
-            }
+    let pwInput = "";
+    function pressKey(n) {
+        if(pwInput.length < 4) {
+            pwInput += n; playSound(1200, 0.05);
+            document.getElementById('pw-dots').innerText = "●".repeat(pwInput.length);
         }
-
-        function resetPw() { pwInput = ""; document.getElementById('pw-dots').innerText = ""; }
-
-        function process() {
-            showScreen('screen-loading');
-            const data = document.getElementById('set-data').value || "HAPPY-GIFT";
-            document.getElementById('res-date').innerText = new Date().toLocaleString();
-            document.getElementById('res-target').innerText = document.getElementById('set-target').value;
-            document.getElementById('res-coupon').innerText = document.getElementById('set-coupon').value;
-            document.getElementById('res-bottom').innerText = document.getElementById('set-bottom').value;
-            document.getElementById('res-code-text').innerText = data;
-
-            if(document.getElementById('set-type').value === 'qr') {
-                document.getElementById('qrcode').style.display = 'flex';
-                document.getElementById('qrcode').innerHTML = "";
-                new QRCode(document.getElementById("qrcode"), { text: data, width: 130, height: 130 });
+        if(pwInput.length === 4) {
+            const correct = document.getElementById('set-pw').value;
+            if(correct && pwInput !== correct) {
+                speak("비밀번호가 틀렸습니다."); resetPw();
             } else {
-                document.getElementById('barcode').style.display = 'block';
+                speak("잠시만 기다려 주십시오.");
+                showScreen('screen-loading');
+                setTimeout(finish, 3000);
             }
-
-            setTimeout(() => {
-                speak("거래가 완료되었습니다. 하단의 명세표를 확인해 주십시오.");
-                showScreen('screen-result');
-            }, 3000);
         }
+    }
+    function resetPw() { pwInput = ""; document.getElementById('pw-dots').innerText = ""; playSound(400, 0.1); }
 
-        // 이미지 저장 기능
-        function downloadReceipt() {
-            const area = document.getElementById('receipt-capture');
-            html2canvas(area).then(canvas => {
-                const link = document.createElement('a');
-                link.download = '행복은행_명세표.png';
-                link.href = canvas.toDataURL();
-                link.click();
-            });
-        }
-    </script>
+    function finish() {
+        document.getElementById('res-target').innerText = document.getElementById('set-target').value;
+        document.getElementById('res-coupon').innerText = document.getElementById('set-coupon').value;
+        document.getElementById('res-msg').innerText = document.getElementById('set-msg').value;
+        const data = document.getElementById('set-data').value || "HAPPY-GIFT";
+        document.getElementById('res-code').innerText = data;
+
+        if(document.getElementById('set-type').value === 'qr') {
+            document.getElementById('qrcode').style.display = 'flex';
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), { text: data, width: 140, height: 140 });
+        } else { document.getElementById('barcode').style.display = 'block'; }
+
+        speak("거래가 완료되었습니다. 명세표를 받아주십시오.");
+        showScreen('screen-result');
+        playSound(1200, 0.5);
+    }
+
+    function saveImg() {
+        html2canvas(document.getElementById('receipt-capture')).then(canvas => {
+            const a = document.createElement('a');
+            a.download = '행복은행_명세표.png';
+            a.href = canvas.toDataURL();
+            a.click();
+        });
+    }
+</script>
+<style> @keyframes spin { 100% { transform: rotate(360deg); } } </style>
 </body>
 </html>
