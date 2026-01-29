@@ -4,78 +4,183 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>효도은행 ATM</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #f4f7fa; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .atm-container { width: 360px; height: 640px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        :root { --primary-color: #0046ff; --bg-color: #f4f7fa; }
+        body { font-family: 'Pretendard', -apple-system, sans-serif; background-color: #333; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        .phone-frame { width: 360px; height: 740px; background: white; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden; position: relative; display: flex; flex-direction: column; border: 8px solid #222; }
         
-        /* Header */
-        .header { background: #0046ff; color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 1.2rem; }
-        
-        /* Main Content */
-        .content { flex: 1; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .user-info { font-size: 1.4rem; margin-bottom: 10px; color: #333; }
-        .main-msg { font-size: 1rem; color: #666; margin-bottom: 40px; line-height: 1.5; }
-        
-        /* Button */
-        .withdraw-btn { background: #0046ff; color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s; box-shadow: 0 5px 15px rgba(0,70,255,0.3); }
-        .withdraw-btn:active { transform: scale(0.95); }
+        .screen { flex: 1; display: none; flex-direction: column; padding: 25px; box-sizing: border-box; }
+        .screen.active { display: flex; }
 
-        /* Receipt/Coupon Modal (Hidden by default) */
-        #receipt { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; background: white; border: 1px solid #ddd; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.2); z-index: 10; border-top: 8px dashed #0046ff; }
-        .receipt-title { font-weight: bold; font-size: 1.1rem; border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 15px; }
-        .receipt-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 0.9rem; }
-        .barcode { width: 100%; height: 60px; background: repeating-linear-gradient(90deg, #000, #000 2px, #fff 2px, #fff 5px); margin-top: 20px; }
-        .coupon-code { font-family: monospace; font-weight: bold; margin-top: 5px; color: #555; }
+        /* 설정 화면 */
+        .setup-screen { overflow-y: auto; }
+        .setup-screen h2 { font-size: 1.2rem; color: var(--primary-color); margin-top: 0; }
+        .setup-screen input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
+        .start-btn { background: #222; color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+
+        /* 헤더 */
+        .header { background: var(--primary-color); color: white; padding: 20px; text-align: center; font-weight: bold; margin: -25px -25px 20px -25px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
-        .loading { display: none; font-weight: bold; color: #0046ff; }
+        /* 메인 화면 */
+        .main-content { text-align: center; justify-content: center; flex: 1; display: flex; flex-direction: column; }
+        .withdraw-btn { background: var(--primary-color); color: white; border: none; width: 160px; height: 160px; border-radius: 50%; font-size: 1.3rem; font-weight: bold; cursor: pointer; margin: 0 auto; box-shadow: 0 10px 25px rgba(0,70,255,0.4); transition: 0.2s; }
+        .withdraw-btn:active { transform: scale(0.9); }
+
+        /* 키패드 */
+        .pw-display { font-size: 2.5rem; letter-spacing: 15px; height: 50px; margin-bottom: 20px; text-align: center; color: var(--primary-color); }
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .key { background: #f8f9fa; padding: 20px; border-radius: 15px; text-align: center; font-size: 1.4rem; cursor: pointer; font-weight: bold; border: 1px solid #eee; }
+        .key:active { background: #e2e6ea; }
+
+        /* 영수증/QR 결과 */
+        #receipt { background: white; border: 1px solid #ddd; padding: 20px; border-top: 10px dashed var(--primary-color); text-align: center; }
+        .receipt-info { text-align: left; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .receipt-info p { margin: 5px 0; font-size: 0.9rem; }
+        #qrcode { display: flex; justify-content: center; margin: 20px 0; }
+        #qrcode img { border: 4px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        
+        .loading-text { font-weight: bold; color: var(--primary-color); font-size: 1.5rem; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<div class="atm-container">
-    <div class="header">🏛️ 효도은행 (Hyo-do Bank)</div>
-    
-    <div class="content" id="main-ui">
-        <div class="user-info"><b>김철수 & 이영희</b> 고객님</div>
-        <div class="main-msg">언제나 든든한 버팀목이 되어주셔서 감사합니다.<br>준비된 사랑을 인출하시겠습니까?</div>
-        
-        <button class="withdraw-btn" onclick="startWithdraw()">용돈 인출하기</button>
-        <div id="loader" class="loading">💰 현금을 세는 중...</div>
-    </div>
-
-    <div id="receipt">
-        <div class="receipt-title">🎫 효도 쿠폰 발행 완료</div>
-        <div class="receipt-row"><span>쿠폰명:</span> <strong>무제한 안마 & 용돈</strong></div>
-        <div class="receipt-row"><span>인출인:</span> <strong>최고의 자녀</strong></div>
-        <div class="receipt-row"><span>유효기간:</span> <strong>평생 무제한</strong></div>
-        <div style="margin-top: 15px; font-size: 0.85rem; color: #444; border-top: 1px solid #eee; pt-10px;">
-            "엄마 아빠, 항상 건강하고 사랑해요!"
+    <div class="phone-frame">
+        <div id="screen-setup" class="screen active setup-screen">
+            <h2>⚙️ 효도 ATM 사전 설정</h2>
+            <input type="text" id="parent-name" placeholder="부모님 성함 (예: 이영희 고객님)">
+            <input type="text" id="coupon-name" placeholder="쿠폰명 (예: 무제한 안마권)">
+            <input type="text" id="coupon-msg" placeholder="부모님께 전하는 메시지">
+            <input type="text" id="coupon-url" placeholder="연결할 URL (예: https://...)">
+            <button class="start-btn" onclick="goToMain()">이벤트 시작하기</button>
         </div>
-        <div class="barcode"></div>
-        <div class="coupon-code">LOVE-0508-2024</div>
-        <p style="font-size: 0.7rem; color: #999;">본 쿠폰은 효도은행 본점에서만 사용 가능합니다.</p>
-        <button onclick="location.reload()" style="margin-top:10px; border:none; background:none; color:#0046ff; cursor:pointer;">처음으로</button>
+
+        <div id="screen-main" class="screen">
+            <div class="header">🏛️ 효도은행 (Hyo-do Bank)</div>
+            <div class="main-content">
+                <h3 id="display-name" style="font-size: 1.5rem;">고객님</h3>
+                <p style="color: #666;">본인 인증 후 선물을 인출하세요.</p>
+                <div style="height: 50px;"></div>
+                <button class="withdraw-btn" onclick="goToPassword()">인출 시작</button>
+            </div>
+        </div>
+
+        <div id="screen-pw" class="screen">
+            <div class="header">보안 비밀번호 입력</div>
+            <div class="main-content">
+                <div class="pw-display" id="pw-dots"></div>
+                <div class="keypad">
+                    <script>
+                        for(let i=1; i<=9; i++) document.write(`<div class="key" onclick="pressKey('${i}')">${i}</div>`);
+                    </script>
+                    <div class="key" style="background:none; border:none;"></div>
+                    <div class="key" onclick="pressKey('0')">0</div>
+                    <div class="key" onclick="resetPw()" style="color: red;">C</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-loading" class="screen">
+            <div class="main-content">
+                <div class="loading-text">💰 현금을 세는 중...</div>
+                <p>사랑을 가득 담고 있습니다.</p>
+            </div>
+        </div>
+
+        <div id="screen-result" class="screen">
+            <div class="header">출금 완료</div>
+            <div class="main-content" style="justify-content: flex-start;">
+                <div id="receipt">
+                    <div class="receipt-info">
+                        <p><b>쿠폰:</b> <span id="res-coupon"></span></p>
+                        <p><b>수령:</b> <span id="res-name"></span></p>
+                        <p style="margin-top:10px; color:#0046ff; font-weight:bold;" id="res-msg"></p>
+                    </div>
+                    <div id="qrcode"></div>
+                    <p style="font-size: 0.75rem; color: #888;">QR 코드를 스캔하여 선물을 확인하세요!</p>
+                </div>
+                <button class="start-btn" onclick="location.reload()" style="background:#eee; color:#333; margin-top:20px;">시스템 종료</button>
+            </div>
+        </div>
     </div>
-</div>
 
-<script>
-    function startWithdraw() {
-        const btn = document.querySelector('.withdraw-btn');
-        const loader = document.getElementById('loader');
-        const receipt = document.getElementById('receipt');
+    <script>
+        // 소리 재생용 오디오 컨텍스트
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
-        btn.style.display = 'none';
-        loader.style.display = 'block';
+        function playBeep(freq, duration) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
 
-        // 2초 뒤에 영수증 출력 (인출 소리 나는 척!)
-        setTimeout(() => {
-            loader.innerText = "✅ 인출 완료!";
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function goToMain() {
+            if(!document.getElementById('parent-name').value) return alert("성함을 입력해 주세요!");
+            document.getElementById('display-name').innerText = document.getElementById('parent-name').value + " 고객님";
+            showScreen('screen-main');
+        }
+
+        function goToPassword() {
+            playBeep(880, 0.1);
+            showScreen('screen-pw');
+        }
+
+        let pw = "";
+        function pressKey(num) {
+            if(pw.length < 4) {
+                pw += num;
+                document.getElementById('pw-dots').innerText = "● ".repeat(pw.length);
+                playBeep(1000, 0.1);
+            }
+            if(pw.length === 4) {
+                setTimeout(processWithdraw, 400);
+            }
+        }
+
+        function resetPw() { pw = ""; document.getElementById('pw-dots').innerText = ""; playBeep(440, 0.1); }
+
+        function processWithdraw() {
+            showScreen('screen-loading');
+            
+            // 돈 세는 소리 (연속 비프음)
+            let count = 0;
+            const moneySound = setInterval(() => {
+                playBeep(200 + (count * 100), 0.05);
+                if(count++ > 15) clearInterval(moneySound);
+            }, 100);
+
+            // 데이터 세팅
+            const url = document.getElementById('coupon-url').value || "https://tistory.com";
+            document.getElementById('res-name').innerText = document.getElementById('parent-name').value;
+            document.getElementById('res-coupon').innerText = document.getElementById('coupon-name').value;
+            document.getElementById('res-msg').innerText = `"${document.getElementById('coupon-msg').value}"`;
+
+            // QR 코드 생성
+            document.getElementById('qrcode').innerHTML = ""; // 초기화
+            new QRCode(document.getElementById("qrcode"), {
+                text: url,
+                width: 150,
+                height: 150,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
             setTimeout(() => {
-                receipt.style.display = 'block';
-            }, 500);
-        }, 2000);
-    }
-</script>
-
+                showScreen('screen-result');
+                playBeep(1200, 0.3);
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
