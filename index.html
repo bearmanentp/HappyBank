@@ -25,7 +25,6 @@
         .card { background: var(--white); border-radius: 24px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #F2F4F6; margin-bottom: 15px; width: 100%; box-sizing: border-box; }
         .display-box { background: #F9FAFB; padding: 20px; border-radius: 18px; font-size: 26px; font-weight: 800; text-align: center; border: 3px solid var(--primary); color: var(--primary); margin: 15px 0; width: 100%; box-sizing: border-box; min-height: 75px; display: flex; align-items: center; justify-content: center; }
 
-        /* 목록 스타일 */
         .user-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #EEE; cursor: pointer; }
         .user-item:last-child { border-bottom: none; }
         .user-info { display: flex; flex-direction: column; }
@@ -72,110 +71,84 @@
         </div>
     </div>
 
-    <div id="scr-list" class="screen">
-        <div class="content-wrapper">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h2 style="margin:0;">등록 회원 목록</h2>
-                <button onclick="openSetup()" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:10px; font-weight:bold;">+ 추가</button>
-            </div>
-            <div id="user-list-container" class="card" style="padding:0;">
-                </div>
+    <div id="scr-list" class="screen"><div class="content-wrapper">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h2 style="margin:0;">등록 회원 목록</h2>
+            <button onclick="openSetup()" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:10px; font-weight:bold;">+ 추가</button>
         </div>
-    </div>
+        <div id="user-list-container" class="card" style="padding:0;"></div>
+    </div></div>
 
-    <div id="scr-setup" class="screen">
-        <div class="content-wrapper">
-            <h2 id="setup-title">회원 정보 등록</h2>
-            <div class="card">
-                <input type="hidden" id="set-index" value="-1">
-                <input type="text" id="set-target" class="form-input" placeholder="성함 (실제 인출 시 사용)">
-                <input type="text" id="set-coupon" class="form-input" placeholder="인출 항목 (예: 신세계 상품권)">
-                <input type="password" id="set-pw" class="form-input" placeholder="비번 4자리 (선택사항)" maxlength="4">
-                <textarea id="set-msg" class="form-input" style="height:80px;" placeholder="영수증에 표시될 메시지"></textarea>
-                <div style="display:flex; gap:10px;">
-                    <select id="set-type" class="form-input" style="flex:1;"><option value="barcode">바코드</option><option value="qr">QR코드</option></select>
-                    <input type="text" id="set-data" class="form-input" style="flex:1;" placeholder="코드 데이터">
-                </div>
+    <div id="scr-setup" class="screen"><div class="content-wrapper">
+        <h2 id="setup-title">회원 정보 등록</h2>
+        <div class="card">
+            <input type="hidden" id="set-index" value="-1">
+            <input type="text" id="set-target" class="form-input" placeholder="성함">
+            <input type="text" id="set-coupon" class="form-input" placeholder="인출 항목">
+            <input type="password" id="set-pw" class="form-input" placeholder="비번 4자리" maxlength="4">
+            <textarea id="set-msg" class="form-input" style="height:80px;" placeholder="메시지"></textarea>
+            <div style="display:flex; gap:10px;">
+                <select id="set-type" class="form-input" style="flex:1;"><option value="barcode">바코드</option><option value="qr">QR코드</option></select>
+                <input type="text" id="set-data" class="form-input" style="flex:1;" placeholder="데이터">
             </div>
-            <button class="btn-full" onclick="saveData()">서버에 저장하기</button>
-            <button id="del-btn" class="btn-full" onclick="deleteUser()" style="background:var(--red); display:none;">정보 삭제</button>
         </div>
-    </div>
+        <button class="btn-full" onclick="saveData()">저장</button>
+        <button id="del-btn" class="btn-full" onclick="deleteUser()" style="background:var(--red); display:none;">삭제</button>
+    </div></div>
 
-    <div id="scr-name" class="screen" style="overflow:hidden;">
-        <div class="content-wrapper">
-            <h2>성함을 입력해 주세요.</h2>
-            <div id="display-name" class="display-box"></div>
-        </div>
-        <div class="kb-area">
-            <div class="kb-grid">
-                <script>
-                    const chars = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','ㅏ','ㅑ','ㅓ','ㅕ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ','ㅐ','ㅔ'];
-                    chars.forEach(c => document.write(`<div class="k-btn" onclick="kPress('${c}')">${c}</div>`));
-                </script>
-                <div class="k-btn" style="grid-column: span 2; background:#8B95A1; color:white;" onclick="kReset()">삭제</div>
-                <div class="k-btn" style="grid-column: span 3; background:var(--primary); color:white;" onclick="kCheck()">확인</div>
-            </div>
-        </div>
+    <div id="scr-name" class="screen"><div class="content-wrapper"><h2>성함을 입력하세요.</h2><div id="display-name" class="display-box"></div></div>
+        <div class="kb-area"><div class="kb-grid">
+            <script>['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','ㅏ','ㅑ','ㅓ','ㅕ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ','ㅐ','ㅔ'].forEach(c => document.write(`<div class="k-btn" onclick="kPress('${c}')">${c}</div>`));</script>
+            <div class="k-btn" style="grid-column: span 2; background:#8B95A1; color:white;" onclick="kReset()">삭제</div>
+            <div class="k-btn" style="grid-column: span 3; background:var(--primary); color:white;" onclick="kCheck()">확인</div>
+        </div></div>
     </div>
 
     <div id="scr-pw" class="screen">
-        <div class="content-wrapper">
-            <h2>비밀번호를 입력하세요.</h2>
-            <div style="display:flex; justify-content:center; gap:20px; margin:40px 0;">
-                <div class="p-dot" style="width:20px; height:20px; border-radius:50%; background:#D1D6DB;"></div>
-                <div class="p-dot" style="width:20px; height:20px; border-radius:50%; background:#D1D6DB;"></div>
-                <div class="p-dot" style="width:20px; height:20px; border-radius:50%; background:#D1D6DB;"></div>
-                <div class="p-dot" style="width:20px; height:20px; border-radius:50%; background:#D1D6DB;"></div>
-            </div>
-            <div class="num-grid">
-                <script>for(let i=1; i<=9; i++) document.write(`<div class="n-btn" onclick="pPress('${i}')">${i}</div>`);</script>
-                <div class="n-btn" style="color:var(--grey); font-size:18px;" onclick="pReset()">정정</div>
-                <div class="n-btn" onclick="pPress('0')">0</div>
-                <div class="n-btn" style="color:var(--primary); font-size:18px;" onclick="pCheck()">확인</div>
-            </div>
+        <div class="content-wrapper"><h2>비밀번호 입력</h2>
+            <div style="display:flex; justify-content:center; gap:20px; margin:40px 0;"><div class="p-dot" style="width:20px; height:20px; border-radius:50%; background:#D1D6DB;"></div><div class="p-dot" style="width:20px; height:20px; border-radius:50%; background:#D1D6DB;"></div><div class="p-dot" style="width:20px; height:20px; border-radius:50%; background:#D1D6DB;"></div><div class="p-dot" style="width:20px; height:20px; border-radius:50%; background:#D1D6DB;"></div></div>
+            <div class="num-grid"><script>for(let i=1; i<=9; i++) document.write(`<div class="n-btn" onclick="pPress('${i}')">${i}</div>`);</script><div class="n-btn" style="color:var(--grey); font-size:18px;" onclick="pReset()">정정</div><div class="n-btn" onclick="pPress('0')">0</div><div class="n-btn" style="color:var(--primary); font-size:18px;" onclick="pCheck()">확인</div></div>
         </div>
     </div>
 
-    <div id="scr-result" class="screen">
-        <div class="content-wrapper" style="max-width:450px; padding-bottom:50px;">
-            <div id="capture-area" class="receipt">
-                <h2 style="text-align:center; color:var(--primary); border-bottom:2px dashed #EEE; padding-bottom:15px; margin-bottom:15px;">거래 명세표</h2>
-                <div style="font-size:17px; line-height:2.4;">
-                    <div style="display:flex; justify-content:space-between;"><span>수령인</span><strong id="res-target"></strong></div>
-                    <div style="display:flex; justify-content:space-between;"><span>항목</span><strong id="res-coupon" style="color:var(--primary);"></strong></div>
-                </div>
-                <div id="res-msg" style="background:#F9FAFB; padding:20px; border-radius:15px; text-align:center; font-weight:700; margin:15px 0; border:1px solid #EEE;"></div>
-                <div style="display:flex; flex-direction:column; align-items:center;">
-                    <div id="qrcode"></div>
-                    <div id="barcode" style="display:none; width:100%; height:60px; background:repeating-linear-gradient(90deg, #000 0, #000 3px, #fff 3px, #fff 7px);"></div>
-                    <div id="res-code-val" style="margin-top:10px; font-family:monospace; color:var(--grey);"></div>
-                </div>
-            </div>
-            <button class="btn-full" onclick="download()" style="background:#E5E8EB; color:var(--text); margin-top:20px;">이미지 저장</button>
-            <button class="btn-full" onclick="location.reload()" style="margin-top:10px;">홈으로</button>
-        </div>
-    </div>
+    <div id="scr-result" class="screen"><div class="content-wrapper" style="max-width:450px;">
+        <div id="capture-area" class="receipt"><h2 style="text-align:center; color:var(--primary);">명세표</h2><div style="font-size:17px; line-height:2.4;"><div style="display:flex; justify-content:space-between;"><span>수령인</span><strong id="res-target"></strong></div><div style="display:flex; justify-content:space-between;"><span>항목</span><strong id="res-coupon" style="color:var(--primary);"></strong></div></div><div id="res-msg" style="background:#F9FAFB; padding:20px; border-radius:15px; text-align:center; margin:15px 0;"></div><div style="display:flex; flex-direction:column; align-items:center;"><div id="qrcode"></div><div id="barcode" style="display:none; width:100%; height:60px; background:repeating-linear-gradient(90deg, #000 0, #000 3px, #fff 3px, #fff 7px);"></div><div id="res-code-val" style="margin-top:10px; font-family:monospace; color:var(--grey);"></div></div></div>
+        <button class="btn-full" onclick="download()" style="background:#E5E8EB; color:var(--text); margin-top:20px;">저장</button>
+        <button class="btn-full" onclick="location.reload()" style="margin-top:10px;">홈으로</button>
+    </div></div>
 </div>
 
-<div id="lotto-modal" class="modal" onclick="closeLotto()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 style="color:#B8860B;">💰 행운의 번호</h2>
-        <div id="lotto-nums" style="margin: 25px 0;"></div>
-        <button class="btn-full" onclick="closeLotto()" style="background:var(--text);">닫기</button>
-    </div>
-</div>
+<div id="lotto-modal" class="modal" onclick="closeLotto()"><div class="modal-content" onclick="event.stopPropagation()"><h2 style="color:#B8860B;">💰 행운의 번호</h2><div id="lotto-nums" style="margin: 25px 0;"></div><button class="btn-full" onclick="closeLotto()" style="background:var(--text);">닫기</button></div></div>
 
 <script>
     let audioCtx;
     let voices = [];
     let userList = JSON.parse(localStorage.getItem('atm_user_list')) || [];
-    let currentUser = null; // 인출 중인 사용자
+    let currentUser = null;
     let historyStack = [];
 
+    // [중요: 모바일 오디오 잠금 해제 함수]
     function initAudio() { 
-        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
-        if(voices.length === 0) voices = window.speechSynthesis.getVoices();
+        if(!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        // 브라우저가 오디오를 중지시킨 상태라면 다시 시작
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        // iOS/Safari 등에서 오디오를 활성화하기 위한 무음 버퍼 재생
+        const buffer = audioCtx.createBuffer(1, 1, 22050);
+        const source = audioCtx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioCtx.destination);
+        source.start(0);
+
+        // 음성 목록 로드 시도
+        if(voices.length === 0) {
+            voices = window.speechSynthesis.getVoices();
+        }
     }
 
     function beep(f, d) { 
@@ -189,10 +162,14 @@
     }
 
     function speak(text) {
+        if (!window.speechSynthesis) return;
         window.speechSynthesis.cancel(); 
         const msg = new SpeechSynthesisUtterance(text);
+        
+        // 한국어 음성 설정 최적화
         if (voices.length === 0) voices = window.speechSynthesis.getVoices();
-        const fv = voices.find(v => v.lang.includes('ko') && (v.name.includes('Google') || v.name.includes('Female')));
+        const fv = voices.find(v => v.lang.includes('ko') && (v.name.includes('Google') || v.name.includes('Female') || v.name.includes('Yuna') || v.name.includes('Heami')));
+        
         if (fv) msg.voice = fv;
         msg.lang = 'ko-KR';
         msg.rate = 1.0; 
@@ -200,6 +177,7 @@
         window.speechSynthesis.speak(msg);
     }
 
+    // 목소리 로딩 이벤트 리스너
     window.speechSynthesis.onvoiceschanged = () => { voices = window.speechSynthesis.getVoices(); };
 
     function move(id) {
@@ -218,126 +196,69 @@
         document.getElementById(prev).classList.add('active');
     }
 
-    // [목록 관리 로직]
     function renderUserList() {
         const container = document.getElementById('user-list-container');
         if(userList.length === 0) {
             container.innerHTML = '<div style="padding:40px; text-align:center; color:#8B95A1;">등록된 정보가 없습니다.</div>';
             return;
         }
-        container.innerHTML = userList.map((u, idx) => `
-            <div class="user-item" onclick="openSetup(${idx})">
-                <div class="user-info">
-                    <span class="user-name">${u.name}</span>
-                    <span class="user-sub">${u.coupon}</span>
-                </div>
-                <span style="color:var(--primary); font-weight:bold;">수정 ></span>
-            </div>
-        `).join('');
+        container.innerHTML = userList.map((u, idx) => `<div class="user-item" onclick="openSetup(${idx})"><div class="user-info"><span class="user-name">${u.name}</span><span class="user-sub">${u.coupon}</span></div><span style="color:var(--primary); font-weight:bold;">수정 ></span></div>`).join('');
     }
 
     function openSetup(idx = -1) {
         document.getElementById('setup-title').innerText = idx === -1 ? "회원 정보 등록" : "회원 정보 수정";
         document.getElementById('del-btn').style.display = idx === -1 ? "none" : "block";
-        
         if(idx === -1) {
             document.getElementById('set-index').value = "-1";
-            document.getElementById('set-target').value = "";
-            document.getElementById('set-coupon').value = "";
-            document.getElementById('set-pw').value = "";
-            document.getElementById('set-msg').value = "";
-            document.getElementById('set-data').value = "";
+            document.getElementById('set-target').value = ""; document.getElementById('set-coupon').value = "";
+            document.getElementById('set-pw').value = ""; document.getElementById('set-msg').value = ""; document.getElementById('set-data').value = "";
         } else {
             const u = userList[idx];
             document.getElementById('set-index').value = idx;
-            document.getElementById('set-target').value = u.name;
-            document.getElementById('set-coupon').value = u.coupon;
-            document.getElementById('set-pw').value = u.pw || "";
-            document.getElementById('set-msg').value = u.msg;
-            document.getElementById('set-type').value = u.type;
-            document.getElementById('set-data').value = u.data;
+            document.getElementById('set-target').value = u.name; document.getElementById('set-coupon').value = u.coupon;
+            document.getElementById('set-pw').value = u.pw || ""; document.getElementById('set-msg').value = u.msg;
+            document.getElementById('set-type').value = u.type; document.getElementById('set-data').value = u.data;
         }
         move('setup');
     }
 
     function saveData() {
         const idx = parseInt(document.getElementById('set-index').value);
-        const d = {
-            name: document.getElementById('set-target').value.trim(),
-            coupon: document.getElementById('set-coupon').value.trim(),
-            pw: document.getElementById('set-pw').value,
-            msg: document.getElementById('set-msg').value,
-            type: document.getElementById('set-type').value,
-            data: document.getElementById('set-data').value || "HAPPY-GIFT"
-        };
-        
-        if(!d.name || !d.coupon) return alert("이름과 항목은 필수입니다.");
-
-        if(idx === -1) userList.push(d);
-        else userList[idx] = d;
-
+        const d = { name: document.getElementById('set-target').value.trim(), coupon: document.getElementById('set-coupon').value.trim(), pw: document.getElementById('set-pw').value, msg: document.getElementById('set-msg').value, type: document.getElementById('set-type').value, data: document.getElementById('set-data').value || "HAPPY-GIFT" };
+        if(!d.name || !d.coupon) return alert("필수 입력 항목을 확인하세요.");
+        if(idx === -1) userList.push(d); else userList[idx] = d;
         localStorage.setItem('atm_user_list', JSON.stringify(userList));
-        speak("저장되었습니다.");
-        renderUserList();
-        goBack();
+        speak("정보가 안전하게 저장되었습니다.");
+        renderUserList(); goBack();
     }
 
-    function deleteUser() {
-        if(!confirm("정말 삭제하시겠습니까?")) return;
-        const idx = parseInt(document.getElementById('set-index').value);
-        userList.splice(idx, 1);
-        localStorage.setItem('atm_user_list', JSON.stringify(userList));
-        renderUserList();
-        goBack();
-    }
+    function deleteUser() { if(!confirm("삭제하시겠습니까?")) return; userList.splice(parseInt(document.getElementById('set-index').value), 1); localStorage.setItem('atm_user_list', JSON.stringify(userList)); renderUserList(); goBack(); }
 
-    // [ATM 인출 로직]
     function handleWithdraw() {
-        initAudio();
-        if(userList.length === 0) {
-            speak("등록된 회원이 없습니다. 정보를 먼저 등록해주세요.");
-            openSetup();
-            return;
-        }
-        nArr = []; updateN();
-        move('name');
-        speak("성함을 입력해 주세요.");
+        initAudio(); // 버튼 클릭 시 오디오 활성화
+        if(userList.length === 0) { speak("등록된 회원이 없습니다."); openSetup(); return; }
+        nArr = []; updateN(); move('name'); speak("성함을 입력해 주세요.");
     }
 
     let nArr = [];
     function kPress(k) { beep(1000, 0.05); nArr.push(k); updateN(); }
     function kReset() { nArr.pop(); updateN(); }
     function updateN() { document.getElementById('display-name').innerText = Hangul.assemble(nArr); }
-    
     function kCheck() {
-        const inputName = Hangul.assemble(nArr);
-        currentUser = userList.find(u => u.name === inputName);
-        
-        if(currentUser) {
-            move('pw');
-            speak("확인되었습니다. 비밀번호 4자리를 입력하고 확인을 눌러주세요.");
-        } else {
-            speak("등록되지 않은 이름입니다. 다시 확인해 주세요.");
-        }
+        const name = Hangul.assemble(nArr);
+        currentUser = userList.find(u => u.name === name);
+        if(currentUser) { move('pw'); speak("확인되었습니다. 비밀번호를 입력하세요."); }
+        else { speak("등록되지 않은 이름입니다."); }
     }
 
     let pStr = "";
     function pPress(n) { if(pStr.length < 4) { pStr += n; beep(1100, 0.05); updateDots(); } }
     function pReset() { pStr = ""; updateDots(); }
-    function updateDots() {
-        const dots = document.querySelectorAll('.p-dot');
-        dots.forEach((dot, idx) => { dot.style.background = idx < pStr.length ? "var(--primary)" : "#D1D6DB"; });
-    }
-
+    function updateDots() { document.querySelectorAll('.p-dot').forEach((dot, idx) => { dot.style.background = idx < pStr.length ? "var(--primary)" : "#D1D6DB"; }); }
     function pCheck() {
-        if(pStr.length < 4) { speak("비밀번호 4자리를 입력해주세요."); return; }
-        if(!currentUser.pw || pStr === currentUser.pw) {
-            speak("인증되었습니다. 거래 명세표를 출력합니다.");
-            finish();
-        } else {
-            speak("비밀번호가 틀렸습니다. 다시 입력해 주세요.");
-            pReset();
-        }
+        if(pStr.length < 4) return;
+        if(!currentUser.pw || pStr === currentUser.pw) { speak("인증에 성공했습니다. 명세표를 확인하세요."); finish(); }
+        else { speak("비밀번호가 틀렸습니다."); pReset(); }
     }
 
     function finish() {
@@ -345,36 +266,21 @@
         document.getElementById('res-coupon').innerText = currentUser.coupon;
         document.getElementById('res-msg').innerText = currentUser.msg;
         document.getElementById('res-code-val').innerText = currentUser.data;
-        const q = document.getElementById('qrcode');
-        const b = document.getElementById('barcode');
-        q.style.display = currentUser.type === 'qr' ? 'block' : 'none';
-        b.style.display = currentUser.type === 'barcode' ? 'block' : 'none';
+        const q = document.getElementById('qrcode'); const b = document.getElementById('barcode');
+        q.style.display = currentUser.type === 'qr' ? 'block' : 'none'; b.style.display = currentUser.type === 'barcode' ? 'block' : 'none';
         if(currentUser.type === 'qr') { q.innerHTML = ""; new QRCode(q, {text: currentUser.data, width: 110, height: 110}); }
         move('result');
     }
 
     function showLotto() {
-        const nums = [];
-        while(nums.length < 6) {
-            let r = Math.floor(Math.random() * 45) + 1;
-            if(!nums.includes(r)) nums.push(r);
-        }
+        initAudio();
+        const nums = []; while(nums.length < 6) { let r = Math.floor(Math.random() * 45) + 1; if(!nums.includes(r)) nums.push(r); }
         document.getElementById('lotto-nums').innerHTML = nums.sort((a,b)=>a-b).map(n => `<span class="lotto-num">${n}</span>`).join('');
         document.getElementById('lotto-modal').style.display = 'flex';
-        speak("행운의 번호입니다. 좋은 결과 있으시길 바랍니다.");
+        speak("오늘의 행운 번호입니다.");
     }
-
     function closeLotto() { document.getElementById('lotto-modal').style.display = 'none'; }
-
-    function download() {
-        html2canvas(document.getElementById('capture-area')).then(canvas => {
-            const link = document.createElement('a');
-            link.download = `명세표_${currentUser.name}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-            speak("이미지를 저장했습니다.");
-        });
-    }
+    function download() { html2canvas(document.getElementById('capture-area')).then(canvas => { const link = document.createElement('a'); link.download = `명세표.png`; link.href = canvas.toDataURL(); link.click(); speak("이미지가 저장되었습니다."); }); }
 </script>
 </body>
 </html>
