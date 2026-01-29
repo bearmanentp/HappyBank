@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>행복은행 ATM</title>
+    <title>행복은행 ATM - 멀티 계정</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://unpkg.com/hangul-js"></script>
@@ -12,40 +12,39 @@
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, sans-serif; background: var(--bg); overflow: hidden; touch-action: none; }
         .atm-container { width: 100%; height: 100%; display: flex; flex-direction: column; position: relative; }
 
-        /* 네비게이션 */
         .atm-nav { padding: 0 20px; display: flex; align-items: center; justify-content: space-between; background: var(--white); border-bottom: 1px solid #E5E8EB; height: 60px; flex-shrink: 0; }
         .nav-title { font-weight: 900; color: var(--primary); font-size: 22px; }
         .back-btn { background: #F2F4F6; border: none; font-size: 24px; cursor: pointer; width: 45px; height: 45px; border-radius: 12px; visibility: hidden; }
         .back-btn.active { visibility: visible; }
 
-        /* 화면 */
-        .screen { flex: 1; display: none; flex-direction: column; padding: 20px; box-sizing: border-box; width: 100%; align-items: center; overflow: hidden; }
+        .screen { flex: 1; display: none; flex-direction: column; padding: 20px; box-sizing: border-box; width: 100%; align-items: center; overflow-y: auto; }
         .screen.active { display: flex; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .content-wrapper { width: 100%; max-width: 800px; display: flex; flex-direction: column; height: 100%; }
+        .content-wrapper { width: 100%; max-width: 800px; display: flex; flex-direction: column; }
         .card { background: var(--white); border-radius: 24px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #F2F4F6; margin-bottom: 15px; width: 100%; box-sizing: border-box; }
         .display-box { background: #F9FAFB; padding: 20px; border-radius: 18px; font-size: 26px; font-weight: 800; text-align: center; border: 3px solid var(--primary); color: var(--primary); margin: 15px 0; width: 100%; box-sizing: border-box; min-height: 75px; display: flex; align-items: center; justify-content: center; }
 
-        /* 키보드 */
+        /* 목록 스타일 */
+        .user-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #EEE; cursor: pointer; }
+        .user-item:last-child { border-bottom: none; }
+        .user-info { display: flex; flex-direction: column; }
+        .user-name { font-weight: 800; font-size: 18px; }
+        .user-sub { font-size: 13px; color: var(--grey); }
+
         .kb-area { background: #D1D6DB; padding: 15px 5px; border-radius: 25px 25px 0 0; position: absolute; bottom: 0; left: 0; right: 0; z-index: 100; }
         .kb-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; max-width: 900px; margin: 0 auto; }
-        .k-btn { background: var(--white); padding: 20px 0; border-radius: 10px; text-align: center; font-size: 18px; font-weight: 700; box-shadow: 0 4px 0 #ABB1B7; cursor: pointer; }
+        .k-btn { background: var(--white); padding: 18px 0; border-radius: 10px; text-align: center; font-size: 18px; font-weight: 700; box-shadow: 0 4px 0 #ABB1B7; cursor: pointer; }
         .k-btn:active { transform: translateY(3px); box-shadow: none; background: #EEE; }
 
-        /* 명세표 */
-        .receipt { background: white; padding: 30px; border-radius: 20px; border: 1px solid #EEE; width: 100%; box-sizing: border-box; position: relative; }
-        .code-info-text { margin-top: 8px; font-family: monospace; font-size: 14px; color: var(--grey); font-weight: 600; text-align: center; }
-
-        /* 로또 모달 */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .receipt { background: white; padding: 30px; border-radius: 20px; border: 1px solid #EEE; width: 100%; box-sizing: border-box; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: white; border-radius: 30px; padding: 30px; width: 100%; max-width: 400px; text-align: center; }
-        .lotto-num { display: inline-block; width: 38px; height: 38px; line-height: 38px; background: var(--primary); color: white; border-radius: 50%; font-size: 15px; font-weight: 700; margin: 4px; box-shadow: 0 3px 0 #0036A3; }
+        .lotto-num { display: inline-block; width: 38px; height: 38px; line-height: 38px; background: var(--primary); color: white; border-radius: 50%; font-size: 15px; font-weight: 700; margin: 4px; }
 
-        /* 버튼 */
         .btn-full { background: var(--primary); color: white; border: none; padding: 20px; border-radius: 20px; font-size: 18px; font-weight: 800; cursor: pointer; width: 100%; margin-bottom: 10px; }
         .form-input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #DDD; font-size: 16px; margin-bottom: 10px; box-sizing: border-box; }
-        .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 400px; margin: auto auto 20px auto; }
+        .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 400px; margin: auto; }
         .n-btn { padding: 25px; font-size: 28px; font-weight: 800; background: var(--white); border-radius: 18px; text-align: center; box-shadow: 0 5px 0 #E5E8EB; cursor: pointer; }
     </style>
 </head>
@@ -59,40 +58,51 @@
     </nav>
 
     <div id="scr-main" class="screen active">
-        <div class="content-wrapper" style="justify-content: center;">
+        <div class="content-wrapper" style="justify-content: center; height:100%;">
             <h1 style="text-align: center; margin-bottom: 20px;">방문을 환영합니다!</h1>
             <div class="card" style="background: linear-gradient(135deg, #0054FF, #5B8FFF); color:white; padding:40px; margin-bottom: 25px;">
                 <p style="margin:0; opacity:0.8;">출금 가능 포인트</p>
                 <h1 style="margin:10px 0 0 0; font-size:42px;">무제한 (∞)</h1>
             </div>
-            <div style="display:grid; grid-template-columns: 1fr; gap:12px;">
-                <button class="btn-full" onclick="handleWithdraw()" style="height: 80px; font-size: 22px;">💰 예금 인출 시작</button>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <button class="card" onclick="move('setup')" style="cursor:pointer; text-align:center; margin:0;"><b style="color:var(--primary); font-size:18px;">정보 등록</b></button>
-                    <button class="card" onclick="showLotto()" style="cursor:pointer; text-align:center; margin:0; border: 2px solid var(--gold);"><b style="color:#B8860B; font-size:18px;">✨ 행운 로또</b></button>
-                </div>
+            <button class="btn-full" onclick="handleWithdraw()" style="height: 80px; font-size: 22px;">💰 예금 인출 시작</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <button class="card" onclick="renderUserList(); move('list');" style="cursor:pointer; text-align:center; margin:0;"><b style="color:var(--primary); font-size:18px;">정보 관리</b></button>
+                <button class="card" onclick="showLotto()" style="cursor:pointer; text-align:center; margin:0; border: 2px solid var(--gold);"><b style="color:#B8860B; font-size:18px;">✨ 행운 로또</b></button>
             </div>
         </div>
     </div>
 
-    <div id="scr-setup" class="screen" style="overflow-y:auto;">
+    <div id="scr-list" class="screen">
         <div class="content-wrapper">
-            <h2>회원 정보 설정</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2 style="margin:0;">등록 회원 목록</h2>
+                <button onclick="openSetup()" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:10px; font-weight:bold;">+ 추가</button>
+            </div>
+            <div id="user-list-container" class="card" style="padding:0;">
+                </div>
+        </div>
+    </div>
+
+    <div id="scr-setup" class="screen">
+        <div class="content-wrapper">
+            <h2 id="setup-title">회원 정보 등록</h2>
             <div class="card">
-                <input type="text" id="set-target" class="form-input" placeholder="성함 (인출 시 일치해야 함)">
-                <input type="text" id="set-coupon" class="form-input" placeholder="인출 항목 (예: 한우세트 1호)">
-                <input type="password" id="set-pw" class="form-input" placeholder="비번 4자리 (안 적으면 프리패스)" maxlength="4">
-                <textarea id="set-msg" class="form-input" style="height:80px;" placeholder="영수증 메시지"></textarea>
+                <input type="hidden" id="set-index" value="-1">
+                <input type="text" id="set-target" class="form-input" placeholder="성함 (실제 인출 시 사용)">
+                <input type="text" id="set-coupon" class="form-input" placeholder="인출 항목 (예: 신세계 상품권)">
+                <input type="password" id="set-pw" class="form-input" placeholder="비번 4자리 (선택사항)" maxlength="4">
+                <textarea id="set-msg" class="form-input" style="height:80px;" placeholder="영수증에 표시될 메시지"></textarea>
                 <div style="display:flex; gap:10px;">
                     <select id="set-type" class="form-input" style="flex:1;"><option value="barcode">바코드</option><option value="qr">QR코드</option></select>
-                    <input type="text" id="set-data" class="form-input" style="flex:1;" placeholder="코드 데이터 값">
+                    <input type="text" id="set-data" class="form-input" style="flex:1;" placeholder="코드 데이터">
                 </div>
             </div>
-            <button class="btn-full" onclick="saveData()">서버에 저장</button>
+            <button class="btn-full" onclick="saveData()">서버에 저장하기</button>
+            <button id="del-btn" class="btn-full" onclick="deleteUser()" style="background:var(--red); display:none;">정보 삭제</button>
         </div>
     </div>
 
-    <div id="scr-name" class="screen">
+    <div id="scr-name" class="screen" style="overflow:hidden;">
         <div class="content-wrapper">
             <h2>성함을 입력해 주세요.</h2>
             <div id="display-name" class="display-box"></div>
@@ -127,7 +137,7 @@
         </div>
     </div>
 
-    <div id="scr-result" class="screen" style="overflow-y:auto;">
+    <div id="scr-result" class="screen">
         <div class="content-wrapper" style="max-width:450px; padding-bottom:50px;">
             <div id="capture-area" class="receipt">
                 <h2 style="text-align:center; color:var(--primary); border-bottom:2px dashed #EEE; padding-bottom:15px; margin-bottom:15px;">거래 명세표</h2>
@@ -136,29 +146,32 @@
                     <div style="display:flex; justify-content:space-between;"><span>항목</span><strong id="res-coupon" style="color:var(--primary);"></strong></div>
                 </div>
                 <div id="res-msg" style="background:#F9FAFB; padding:20px; border-radius:15px; text-align:center; font-weight:700; margin:15px 0; border:1px solid #EEE;"></div>
-                <div style="display:flex; flex-direction:column; align-items:center; margin:10px 0;">
+                <div style="display:flex; flex-direction:column; align-items:center;">
                     <div id="qrcode"></div>
                     <div id="barcode" style="display:none; width:100%; height:60px; background:repeating-linear-gradient(90deg, #000 0, #000 3px, #fff 3px, #fff 7px);"></div>
-                    <div id="res-code-val" class="code-info-text"></div>
+                    <div id="res-code-val" style="margin-top:10px; font-family:monospace; color:var(--grey);"></div>
                 </div>
             </div>
-            <button class="btn-full" onclick="download()" style="background:#E5E8EB; color:var(--text); margin-top:20px;">명세표 이미지 저장</button>
-            <button class="btn-full" onclick="location.reload()" style="margin-top:10px;">거래 종료</button>
+            <button class="btn-full" onclick="download()" style="background:#E5E8EB; color:var(--text); margin-top:20px;">이미지 저장</button>
+            <button class="btn-full" onclick="location.reload()" style="margin-top:10px;">홈으로</button>
         </div>
     </div>
 </div>
 
 <div id="lotto-modal" class="modal" onclick="closeLotto()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 style="color:#B8860B; margin-top:0;">💰 행운의 번호 💰</h2>
+        <h2 style="color:#B8860B;">💰 행운의 번호</h2>
         <div id="lotto-nums" style="margin: 25px 0;"></div>
-        <button class="btn-full" onclick="closeLotto()" style="margin-top:10px; background:var(--text);">닫기</button>
+        <button class="btn-full" onclick="closeLotto()" style="background:var(--text);">닫기</button>
     </div>
 </div>
 
 <script>
     let audioCtx;
     let voices = [];
+    let userList = JSON.parse(localStorage.getItem('atm_user_list')) || [];
+    let currentUser = null; // 인출 중인 사용자
+    let historyStack = [];
 
     function initAudio() { 
         if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
@@ -179,8 +192,8 @@
         window.speechSynthesis.cancel(); 
         const msg = new SpeechSynthesisUtterance(text);
         if (voices.length === 0) voices = window.speechSynthesis.getVoices();
-        const femaleVoice = voices.find(v => v.lang.includes('ko') && (v.name.includes('Google') || v.name.includes('Female') || v.name.includes('Heami')));
-        if (femaleVoice) msg.voice = femaleVoice;
+        const fv = voices.find(v => v.lang.includes('ko') && (v.name.includes('Google') || v.name.includes('Female')));
+        if (fv) msg.voice = fv;
         msg.lang = 'ko-KR';
         msg.rate = 1.0; 
         msg.pitch = 1.1;
@@ -189,18 +202,12 @@
 
     window.speechSynthesis.onvoiceschanged = () => { voices = window.speechSynthesis.getVoices(); };
 
-    let userData = JSON.parse(localStorage.getItem('happy_atm_data'));
-    let historyStack = [];
-
     function move(id) {
         historyStack.push(document.querySelector('.screen.active').id);
         document.getElementById('nav-back').classList.add('active');
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('scr-'+id).classList.add('active');
         beep(800, 0.1);
-        
-        // 화면 전환 시 초기화
-        if(id === 'pw') pReset();
     }
 
     function goBack() {
@@ -211,35 +218,142 @@
         document.getElementById(prev).classList.add('active');
     }
 
+    // [목록 관리 로직]
+    function renderUserList() {
+        const container = document.getElementById('user-list-container');
+        if(userList.length === 0) {
+            container.innerHTML = '<div style="padding:40px; text-align:center; color:#8B95A1;">등록된 정보가 없습니다.</div>';
+            return;
+        }
+        container.innerHTML = userList.map((u, idx) => `
+            <div class="user-item" onclick="openSetup(${idx})">
+                <div class="user-info">
+                    <span class="user-name">${u.name}</span>
+                    <span class="user-sub">${u.coupon}</span>
+                </div>
+                <span style="color:var(--primary); font-weight:bold;">수정 ></span>
+            </div>
+        `).join('');
+    }
+
+    function openSetup(idx = -1) {
+        document.getElementById('setup-title').innerText = idx === -1 ? "회원 정보 등록" : "회원 정보 수정";
+        document.getElementById('del-btn').style.display = idx === -1 ? "none" : "block";
+        
+        if(idx === -1) {
+            document.getElementById('set-index').value = "-1";
+            document.getElementById('set-target').value = "";
+            document.getElementById('set-coupon').value = "";
+            document.getElementById('set-pw').value = "";
+            document.getElementById('set-msg').value = "";
+            document.getElementById('set-data').value = "";
+        } else {
+            const u = userList[idx];
+            document.getElementById('set-index').value = idx;
+            document.getElementById('set-target').value = u.name;
+            document.getElementById('set-coupon').value = u.coupon;
+            document.getElementById('set-pw').value = u.pw || "";
+            document.getElementById('set-msg').value = u.msg;
+            document.getElementById('set-type').value = u.type;
+            document.getElementById('set-data').value = u.data;
+        }
+        move('setup');
+    }
+
     function saveData() {
+        const idx = parseInt(document.getElementById('set-index').value);
         const d = {
-            name: document.getElementById('set-target').value,
-            coupon: document.getElementById('set-coupon').value,
+            name: document.getElementById('set-target').value.trim(),
+            coupon: document.getElementById('set-coupon').value.trim(),
             pw: document.getElementById('set-pw').value,
             msg: document.getElementById('set-msg').value,
             type: document.getElementById('set-type').value,
-            data: document.getElementById('set-data').value || "HAPPY-GIFT-CODE"
+            data: document.getElementById('set-data').value || "HAPPY-GIFT"
         };
-        if(!d.name || !d.coupon) return alert("필수 정보를 입력하세요.");
-        localStorage.setItem('happy_atm_data', JSON.stringify(d));
-        userData = d;
-        speak("정보가 성공적으로 저장되었습니다.");
-        setTimeout(() => location.reload(), 1200);
+        
+        if(!d.name || !d.coupon) return alert("이름과 항목은 필수입니다.");
+
+        if(idx === -1) userList.push(d);
+        else userList[idx] = d;
+
+        localStorage.setItem('atm_user_list', JSON.stringify(userList));
+        speak("저장되었습니다.");
+        renderUserList();
+        goBack();
     }
 
+    function deleteUser() {
+        if(!confirm("정말 삭제하시겠습니까?")) return;
+        const idx = parseInt(document.getElementById('set-index').value);
+        userList.splice(idx, 1);
+        localStorage.setItem('atm_user_list', JSON.stringify(userList));
+        renderUserList();
+        goBack();
+    }
+
+    // [ATM 인출 로직]
     function handleWithdraw() {
         initAudio();
-        if(!userData) { 
-            speak("등록된 회원 정보가 없습니다. 먼저 정보를 등록해 주세요."); 
-            move('setup'); 
-            return; 
+        if(userList.length === 0) {
+            speak("등록된 회원이 없습니다. 정보를 먼저 등록해주세요.");
+            openSetup();
+            return;
         }
-        move('name'); 
+        nArr = []; updateN();
+        move('name');
         speak("성함을 입력해 주세요.");
     }
 
+    let nArr = [];
+    function kPress(k) { beep(1000, 0.05); nArr.push(k); updateN(); }
+    function kReset() { nArr.pop(); updateN(); }
+    function updateN() { document.getElementById('display-name').innerText = Hangul.assemble(nArr); }
+    
+    function kCheck() {
+        const inputName = Hangul.assemble(nArr);
+        currentUser = userList.find(u => u.name === inputName);
+        
+        if(currentUser) {
+            move('pw');
+            speak("확인되었습니다. 비밀번호 4자리를 입력하고 확인을 눌러주세요.");
+        } else {
+            speak("등록되지 않은 이름입니다. 다시 확인해 주세요.");
+        }
+    }
+
+    let pStr = "";
+    function pPress(n) { if(pStr.length < 4) { pStr += n; beep(1100, 0.05); updateDots(); } }
+    function pReset() { pStr = ""; updateDots(); }
+    function updateDots() {
+        const dots = document.querySelectorAll('.p-dot');
+        dots.forEach((dot, idx) => { dot.style.background = idx < pStr.length ? "var(--primary)" : "#D1D6DB"; });
+    }
+
+    function pCheck() {
+        if(pStr.length < 4) { speak("비밀번호 4자리를 입력해주세요."); return; }
+        if(!currentUser.pw || pStr === currentUser.pw) {
+            speak("인증되었습니다. 거래 명세표를 출력합니다.");
+            finish();
+        } else {
+            speak("비밀번호가 틀렸습니다. 다시 입력해 주세요.");
+            pReset();
+        }
+    }
+
+    function finish() {
+        document.getElementById('res-target').innerText = currentUser.name;
+        document.getElementById('res-coupon').innerText = currentUser.coupon;
+        document.getElementById('res-msg').innerText = currentUser.msg;
+        document.getElementById('res-code-val').innerText = currentUser.data;
+        const q = document.getElementById('qrcode');
+        const b = document.getElementById('barcode');
+        q.style.display = currentUser.type === 'qr' ? 'block' : 'none';
+        b.style.display = currentUser.type === 'barcode' ? 'block' : 'none';
+        if(currentUser.type === 'qr') { q.innerHTML = ""; new QRCode(q, {text: currentUser.data, width: 110, height: 110}); }
+        move('result');
+    }
+
     function showLotto() {
-        initAudio();
         const nums = [];
         while(nums.length < 6) {
             let r = Math.floor(Math.random() * 45) + 1;
@@ -247,81 +361,18 @@
         }
         document.getElementById('lotto-nums').innerHTML = nums.sort((a,b)=>a-b).map(n => `<span class="lotto-num">${n}</span>`).join('');
         document.getElementById('lotto-modal').style.display = 'flex';
-        speak("이번 주 행운의 번호를 뽑아드렸습니다. 꼭 당첨되시길 바랄게요!");
+        speak("행운의 번호입니다. 좋은 결과 있으시길 바랍니다.");
     }
 
     function closeLotto() { document.getElementById('lotto-modal').style.display = 'none'; }
 
-    let nArr = [];
-    function kPress(k) { beep(1000, 0.05); nArr.push(k); updateN(); }
-    function kReset() { nArr.pop(); updateN(); }
-    function updateN() { document.getElementById('display-name').innerText = Hangul.assemble(nArr); }
-    function kCheck() {
-        if(Hangul.assemble(nArr) === userData.name) {
-            move('pw'); 
-            speak("비밀번호 4자리를 입력하고 확인 버튼을 눌러주세요.");
-        } else { speak("이름이 일치하지 않습니다. 다시 입력해 주세요."); }
-    }
-
-    // [비밀번호 로직 수정]
-    let pStr = "";
-    function pPress(n) {
-        if(pStr.length < 4) {
-            pStr += n; 
-            beep(1100, 0.05);
-            updateDots();
-        }
-    }
-    
-    function pReset() { 
-        pStr = ""; 
-        updateDots();
-    }
-    
-    function updateDots() {
-        const dots = document.querySelectorAll('.p-dot');
-        dots.forEach((dot, idx) => {
-            dot.style.background = idx < pStr.length ? "var(--primary)" : "#D1D6DB";
-        });
-    }
-
-    function pCheck() {
-        // 확인 버튼 클릭 시에만 검증
-        if(pStr.length < 4) {
-            speak("비밀번호 4자리를 모두 입력해 주세요.");
-            return;
-        }
-
-        // 비밀번호 검증 (설정 안했으면 통과, 했으면 일치여부 확인)
-        if(!userData.pw || pStr === userData.pw) {
-            speak("인증되었습니다. 명세표를 출력합니다.");
-            finish();
-        } else { 
-            speak("비밀번호가 틀렸습니다. 다시 입력해 주세요."); 
-            pReset(); 
-        }
-    }
-
-    function finish() {
-        document.getElementById('res-target').innerText = userData.name;
-        document.getElementById('res-coupon').innerText = userData.coupon;
-        document.getElementById('res-msg').innerText = userData.msg;
-        document.getElementById('res-code-val').innerText = userData.data;
-        const q = document.getElementById('qrcode');
-        const b = document.getElementById('barcode');
-        q.style.display = userData.type === 'qr' ? 'block' : 'none';
-        b.style.display = userData.type === 'barcode' ? 'block' : 'none';
-        if(userData.type === 'qr') { q.innerHTML = ""; new QRCode(q, {text: userData.data, width: 110, height: 110}); }
-        move('result');
-    }
-
     function download() {
         html2canvas(document.getElementById('capture-area')).then(canvas => {
             const link = document.createElement('a');
-            link.download = '행복은행_명세표.png';
+            link.download = `명세표_${currentUser.name}.png`;
             link.href = canvas.toDataURL();
             link.click();
-            speak("명세표 이미지를 저장했습니다.");
+            speak("이미지를 저장했습니다.");
         });
     }
 </script>
