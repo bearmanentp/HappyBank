@@ -33,16 +33,17 @@
         .k-btn { background: var(--white); padding: 22px 0; border-radius: 10px; text-align: center; font-size: 20px; font-weight: 700; box-shadow: 0 4px 0 #ABB1B7; cursor: pointer; }
         .k-btn:active { transform: translateY(3px); box-shadow: none; background: #EEE; }
 
-        /* 명세표 전용 */
+        /* 명세표 */
         .receipt { background: white; padding: 30px; border-radius: 20px; border: 1px solid #EEE; width: 100%; box-sizing: border-box; position: relative; }
         .code-info-text { margin-top: 8px; font-family: monospace; font-size: 14px; color: var(--grey); font-weight: 600; text-align: center; }
-        
-        /* 로또 (명세표 밖) */
-        .lotto-separate { background: #FFF9E6; padding: 15px; border-radius: 20px; border: 2px dashed var(--gold); margin-top: 20px; width: 100%; text-align: center; box-sizing: border-box; }
-        .lotto-num { display: inline-block; width: 34px; height: 34px; line-height: 34px; background: var(--primary); color: white; border-radius: 50%; font-size: 14px; font-weight: 700; margin: 4px; }
+
+        /* 로또 모달 */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: white; border-radius: 30px; padding: 30px; width: 100%; max-width: 400px; text-align: center; position: relative; }
+        .lotto-num { display: inline-block; width: 40px; height: 40px; line-height: 40px; background: var(--primary); color: white; border-radius: 50%; font-size: 16px; font-weight: 700; margin: 5px; box-shadow: 0 4px 0 #0036A3; }
 
         /* 공통 버튼 */
-        .btn-full { background: var(--primary); color: white; border: none; padding: 20px; border-radius: 20px; font-size: 18px; font-weight: 800; cursor: pointer; width: 100%; }
+        .btn-full { background: var(--primary); color: white; border: none; padding: 20px; border-radius: 20px; font-size: 18px; font-weight: 800; cursor: pointer; width: 100%; margin-bottom: 10px; }
         .form-input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #DDD; font-size: 16px; margin-bottom: 10px; box-sizing: border-box; }
         .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 400px; margin: auto auto 20px auto; }
         .n-btn { padding: 25px; font-size: 28px; font-weight: 800; background: var(--white); border-radius: 18px; text-align: center; box-shadow: 0 5px 0 #E5E8EB; cursor: pointer; }
@@ -59,14 +60,17 @@
 
     <div id="scr-main" class="screen active">
         <div class="content-wrapper" style="justify-content: center;">
-            <h1 style="text-align: center;">방문을 환영합니다!</h1>
-            <div class="card" style="background: linear-gradient(135deg, #0054FF, #5B8FFF); color:white; padding:40px;">
+            <h1 style="text-align: center; margin-bottom: 30px;">안녕하세요!<br>무엇을 도와드릴까요?</h1>
+            <div class="card" style="background: linear-gradient(135deg, #0054FF, #5B8FFF); color:white; padding:40px; margin-bottom: 30px;">
                 <p style="margin:0; opacity:0.8;">출금 가능 포인트</p>
                 <h1 style="margin:10px 0 0 0; font-size:42px;">무제한 (∞)</h1>
             </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                <button class="card" onclick="move('setup')" style="cursor:pointer; text-align:center;"><b style="color:var(--primary); font-size:20px;">정보 등록</b></button>
-                <button class="card" onclick="handleWithdraw()" style="cursor:pointer; text-align:center;"><b style="color:var(--text); font-size:20px;">예금 인출</b></button>
+            <div style="display:grid; grid-template-columns: 1fr; gap:12px;">
+                <button class="btn-full" onclick="handleWithdraw()" style="height: 80px; font-size: 22px;">💰 예금 인출 (쿠폰)</button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <button class="card" onclick="move('setup')" style="cursor:pointer; text-align:center; margin:0;"><b style="color:var(--primary); font-size:18px;">정보 등록</b></button>
+                    <button class="card" onclick="showLotto()" style="cursor:pointer; text-align:center; margin:0; border: 2px solid var(--gold);"><b style="color:#B8860B; font-size:18px;">✨ 행운 로또</b></button>
+                </div>
             </div>
         </div>
     </div>
@@ -95,11 +99,12 @@
         </div>
         <div class="kb-area">
             <div class="kb-grid">
-                <div class="k-btn" onclick="kPress('ㄱ')">ㄱ</div><div class="k-btn" onclick="kPress('ㄴ')">ㄴ</div><div class="k-btn" onclick="kPress('ㄷ')">ㄷ</div><div class="k-btn" onclick="kPress('ㄹ')">ㄹ</div><div class="k-btn" onclick="kPress('ㅁ')">ㅁ</div><div class="k-btn" onclick="kPress('ㅂ')">ㅂ</div><div class="k-btn" onclick="kPress('ㅅ')">ㅅ</div>
-                <div class="k-btn" onclick="kPress('ㅇ')">ㅇ</div><div class="k-btn" onclick="kPress('ㅈ')">ㅈ</div><div class="k-btn" onclick="kPress('ㅊ')">ㅊ</div><div class="k-btn" onclick="kPress('ㅋ')">ㅋ</div><div class="k-btn" onclick="kPress('ㅌ')">ㅌ</div><div class="k-btn" onclick="kPress('ㅍ')">ㅍ</div><div class="k-btn" onclick="kPress('ㅎ')">ㅎ</div>
-                <div class="k-btn" onclick="kPress('ㅏ')">ㅏ</div><div class="k-btn" onclick="kPress('ㅑ')">ㅑ</div><div class="k-btn" onclick="kPress('ㅓ')">ㅓ</div><div class="k-btn" onclick="kPress('ㅕ')">ㅕ</div><div class="k-btn" onclick="kPress('ㅗ')">ㅗ</div><div class="k-btn" onclick="kPress('ㅛ')">ㅛ</div><div class="k-btn" onclick="kPress('ㅜ')">ㅜ</div>
-                <div class="k-btn" onclick="kPress('ㅠ')">ㅠ</div><div class="k-btn" onclick="kPress('ㅡ')">ㅡ</div><div class="k-btn" onclick="kPress('ㅣ')">ㅣ</div><div class="k-btn" onclick="kPress('ㅐ')">ㅐ</div><div class="k-btn" onclick="kPress('ㅔ')">ㅔ</div>
-                <div class="k-btn" style="grid-column: span 2; background:#8B95A1; color:white;" onclick="kReset()">삭제</div><div class="k-btn" style="grid-column: span 3; background:var(--primary); color:white;" onclick="kCheck()">확인</div>
+                <script>
+                    const chars = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','ㅏ','ㅑ','ㅓ','ㅕ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ','ㅐ','ㅔ'];
+                    chars.forEach(c => document.write(`<div class="k-btn" onclick="kPress('${c}')">${c}</div>`));
+                </script>
+                <div class="k-btn" style="grid-column: span 2; background:#8B95A1; color:white;" onclick="kReset()">삭제</div>
+                <div class="k-btn" style="grid-column: span 3; background:var(--primary); color:white;" onclick="kCheck()">확인</div>
             </div>
         </div>
     </div>
@@ -138,15 +143,18 @@
                 </div>
             </div>
             
-            <div class="lotto-separate">
-                <div style="font-size:14px; color:#B8860B; font-weight:800; margin-bottom:10px;">💰 이번 주 행운의 번호 💰</div>
-                <div id="lotto-nums"></div>
-                <div style="font-size:11px; color:var(--grey); margin-top:8px;">(로또 번호는 명세표 이미지에 포함되지 않습니다)</div>
-            </div>
-
             <button class="btn-full" onclick="download()" style="background:#E5E8EB; color:var(--text); margin-top:20px;">명세표 이미지 저장</button>
             <button class="btn-full" onclick="location.reload()" style="margin-top:10px;">거래 종료</button>
         </div>
+    </div>
+</div>
+
+<div id="lotto-modal" class="modal" onclick="closeLotto()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 style="color:#B8860B; margin-top:0;">💰 이번 주 행운 번호 💰</h2>
+        <div id="lotto-nums" style="margin: 25px 0;"></div>
+        <p style="color:var(--grey); font-size:14px;">행복은행이 당신의 행운을 빌어요!</p>
+        <button class="btn-full" onclick="closeLotto()" style="margin-top:10px; background:var(--text);">닫기</button>
     </div>
 </div>
 
@@ -155,13 +163,20 @@
     function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
     function beep(f, d) { if(!audioCtx) return; const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.frequency.value = f; g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d); o.start(); o.stop(audioCtx.currentTime + d); }
 
+    // 개선된 자연스러운 TTS 함수
     function speak(text) {
-        window.speechSynthesis.cancel();
+        window.speechSynthesis.cancel(); // 이전 음성 즉시 중단
         const msg = new SpeechSynthesisUtterance(text);
+        
+        // 목소리 목록 로드 대기 및 최적의 여성 목소리 선택
         const voices = window.speechSynthesis.getVoices();
-        const female = voices.find(v => v.lang.includes('ko') && (v.name.includes('Female') || v.name.includes('Google') || v.name.includes('Heami')));
-        if (female) msg.voice = female;
-        msg.lang = 'ko-KR'; msg.rate = 1.0; msg.pitch = 1.1;
+        const femaleVoice = voices.find(v => v.lang.includes('ko') && (v.name.includes('Female') || v.name.includes('Google') || v.name.includes('Heami') || v.name.includes('SunHi')));
+        
+        if (femaleVoice) msg.voice = femaleVoice;
+        msg.lang = 'ko-KR';
+        msg.rate = 1.0;  // 속도
+        msg.pitch = 1.1; // 음높이 (약간 높게 하여 친절한 톤 유지)
+        
         window.speechSynthesis.speak(msg);
     }
 
@@ -197,55 +212,89 @@
         if(!d.name || !d.coupon) return alert("필수 정보를 입력하세요.");
         localStorage.setItem('happy_atm_data', JSON.stringify(d));
         userData = d;
-        speak("등록이 완료되었습니다.");
-        location.reload();
+        speak("정보 등록이 완료되었습니다. 초기 화면으로 돌아갑니다.");
+        setTimeout(() => location.reload(), 1500);
     }
 
     function handleWithdraw() {
-        if(!userData) { speak("회원 등록을 먼저 해주세요."); move('setup'); return; }
-        move('name'); speak("성함을 입력해 주세요.");
+        if(!userData) { 
+            speak("회원 등록이 되어있지 않습니다. 먼저 정보를 등록해 주세요."); 
+            move('setup'); 
+            return; 
+        }
+        move('name'); 
+        speak("수령하시는 분의 성함을 입력해 주세요.");
     }
 
+    // 로또 기능
+    function showLotto() {
+        initAudio();
+        const nums = [];
+        while(nums.length < 6) {
+            let r = Math.floor(Math.random() * 45) + 1;
+            if(!nums.includes(r)) nums.push(r);
+        }
+        document.getElementById('lotto-nums').innerHTML = nums.sort((a,b)=>a-b).map(n => `<span class="lotto-num">${n}</span>`).join('');
+        document.getElementById('lotto-modal').style.display = 'flex';
+        speak("이번 주 행운의 번호를 생성했습니다. 당신의 당첨을 기원합니다!");
+    }
+
+    function closeLotto() {
+        document.getElementById('lotto-modal').style.display = 'none';
+    }
+
+    // 한글 입력 로직
     let nArr = [];
     function kPress(k) { beep(1000, 0.05); nArr.push(k); updateN(); }
     function kReset() { nArr.pop(); updateN(); }
     function updateN() { document.getElementById('display-name').innerText = Hangul.assemble(nArr); }
     function kCheck() {
-        if(Hangul.assemble(nArr) === userData.name) {
-            move('pw'); speak("비밀번호 4자리를 입력하세요.");
-        } else { speak("이름이 일치하지 않습니다."); }
+        const inputName = Hangul.assemble(nArr);
+        if(inputName === userData.name) {
+            move('pw'); 
+            speak("확인되었습니다. 비밀번호 4자리를 입력해 주세요.");
+        } else { 
+            speak("등록된 성함과 일치하지 않습니다. 다시 확인해 주세요."); 
+        }
     }
 
+    // 비밀번호 로직
     let pStr = "";
     function pPress(n) {
         if(pStr.length < 4) {
             pStr += n; beep(1100, 0.05);
             document.querySelectorAll('.p-dot')[pStr.length-1].style.background = "var(--primary)";
         }
+        if(pStr.length === 4) {
+            setTimeout(() => pCheck(), 300);
+        }
     }
     function pReset() { pStr = ""; document.querySelectorAll('.p-dot').forEach(d => d.style.background = "#D1D6DB"); }
     function pCheck() {
-        if(pStr.length < 4) return;
         if(!userData.pw || pStr === userData.pw) {
-            speak("명세표를 준비합니다.");
+            speak("인증에 성공했습니다. 잠시만 기다리시면 명세표가 출력됩니다.");
             finish();
-        } else { speak("비밀번호 오류입니다."); pReset(); }
+        } else { 
+            speak("비밀번호가 맞지 않습니다. 다시 입력해 주세요."); 
+            pReset(); 
+        }
     }
 
     function finish() {
         document.getElementById('res-target').innerText = userData.name;
         document.getElementById('res-coupon').innerText = userData.coupon;
         document.getElementById('res-msg').innerText = userData.msg;
-        document.getElementById('res-code-val').innerText = userData.data; // 데이터 텍스트 표시
+        document.getElementById('res-code-val').innerText = userData.data;
         
         const q = document.getElementById('qrcode');
         const b = document.getElementById('barcode');
         q.style.display = userData.type === 'qr' ? 'block' : 'none';
         b.style.display = userData.type === 'barcode' ? 'block' : 'none';
-        if(userData.type === 'qr') { q.innerHTML = ""; new QRCode(q, {text: userData.data, width: 110, height: 110}); }
-
-        const nums = []; while(nums.length < 6) { let r = Math.floor(Math.random() * 45) + 1; if(!nums.includes(r)) nums.push(r); }
-        document.getElementById('lotto-nums').innerHTML = nums.sort((a,b)=>a-b).map(n => `<span class="lotto-num">${n}</span>`).join('');
+        
+        if(userData.type === 'qr') { 
+            q.innerHTML = ""; 
+            new QRCode(q, {text: userData.data, width: 110, height: 110}); 
+        }
         
         move('result');
     }
@@ -253,13 +302,18 @@
     function download() {
         html2canvas(document.getElementById('capture-area')).then(canvas => {
             const link = document.createElement('a');
-            link.download = '거래명세표.png';
+            link.download = '행복은행_명세표.png';
             link.href = canvas.toDataURL();
             link.click();
+            speak("명세표 이미지를 기기에 저장하였습니다.");
         });
     }
 
+    // 초기 보이스 로드
     window.speechSynthesis.getVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = window.speechSynthesis.getVoices;
+    }
 </script>
 </body>
 </html>
