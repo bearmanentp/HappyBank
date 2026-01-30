@@ -2,195 +2,188 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>HAPPY BANK 7.0 - Premium Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HAPPY GIFT BANK</title>
     <style>
-        :root { --primary: #0054FF; --bg: #F4F6FA; --text: #1A1F27; --grey: #8B95A1; --white: #FFFFFF; --gold: #FFD700; --vip: #8E44AD; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
-        .app-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
-        .screen { flex: 1; display: none; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto; padding-bottom: 120px; }
-        .screen.active { display: flex; animation: slideIn 0.3s ease-out; }
-        @keyframes slideIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        
-        /* 포인트 카드 디자인 */
-        .main-card { background: linear-gradient(135deg, #0054FF, #00C2FF); color: white; border-radius: 28px; padding: 25px; box-shadow: 0 15px 30px rgba(0,84,255,0.2); margin-bottom: 20px; position: relative; overflow: hidden; }
-        .tier-badge { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; border: 1px solid rgba(255,255,255,0.3); }
-        
-        /* 버튼 및 입력창 */
-        .btn { background: var(--white); border: none; padding: 18px; border-radius: 20px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: 100%; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .input-field { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #E5E8EB; font-size: 16px; margin-bottom: 15px; box-sizing: border-box; outline: none; }
-        
-        /* 광고 바 */
-        #ad-box { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; padding: 10px 0; z-index: 1000; text-align: center; }
-        .ad-btn { background: #FF3B30; color: white; border: none; padding: 8px 20px; border-radius: 30px; font-weight: bold; margin-bottom: 8px; cursor: pointer; font-size: 12px; }
+        :root { --primary: #0054FF; --bg: #F4F6FA; --card: #FFFFFF; --text: #1A1F27; }
+        body, html { margin: 0; padding: 0; background: var(--bg); font-family: sans-serif; overflow-x: hidden; }
+        .screen { display: none; padding: 20px; box-sizing: border-box; min-height: 100vh; padding-bottom: 120px; }
+        .screen.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .card { background: var(--card); border-radius: 20px; padding: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .btn { width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 16px; }
+        .btn-main { background: var(--primary); color: white; }
+        .input-box { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        .asset-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0; }
+        #ad-bottom { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #ddd; padding: 10px 0; text-align: center; z-index: 1000; }
     </style>
 </head>
 <body onclick="initAudio()">
 
-<div class="app-container">
-    <nav style="padding: 15px 20px; background: white; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-weight: 900; color: var(--primary); font-size: 18px;">HAPPY BANK</span>
-        <button onclick="move('setup')" style="border:none; background:none; font-size:20px;">⚙️</button>
-    </nav>
-
+<div id="app">
     <div id="scr-main" class="screen active">
-        <div class="main-card">
-            <div id="user-tier" class="tier-badge">BRONZE</div>
-            <p style="margin:0; opacity:0.8; font-size:14px;">보유 자산</p>
-            <h1 id="display-p" style="font-size: 42px; margin: 10px 0;">0 P</h1>
-            <div id="daily-status" style="font-size:12px; opacity:0.9;">오늘의 이자가 쌓이고 있습니다...</div>
+        <h2 style="color: var(--primary);">🎁 MY GIFT BANK</h2>
+        <div class="card" style="background: linear-gradient(135deg, #0054FF, #6699FF); color: white;">
+            <p style="margin:0; opacity:0.8;">보유 포인트 (수수료용)</p>
+            <h1 id="main-p">0 P</h1>
         </div>
-
-        <button class="btn btn-primary" onclick="move('transfer')">📤 원격 수표 발행</button>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <button class="btn" onclick="move('receive')">📥 수표 등록</button>
-            <button class="btn" onclick="checkAttendance()">📅 출석체크</button>
-            <button class="btn" onclick="move('game')">🎁 럭키박스</button>
-            <button class="btn" onclick="renderLogs(); move('logs');">📜 거래내역</button>
+        <button class="btn btn-main" onclick="move('inventory')">📦 내 자산 보관함</button>
+        <button class="btn" style="background: #E8F0FF; color: var(--primary);" onclick="move('receive')">📥 선물 코드 등록</button>
+        
+        <h3 style="margin-top:25px;">빠른 선물하기</h3>
+        <div id="quick-assets"></div>
+    </div>
+
+    <div id="scr-inventory" class="screen">
+        <h3>자산 등록하기</h3>
+        <div class="card">
+            <input type="text" id="new-asset-name" class="input-box" placeholder="자산 이름 (예: 커피 쿠폰)">
+            <input type="text" id="new-asset-val" class="input-box" placeholder="상세 내용 (핀번호 또는 메시지)">
+            <button class="btn btn-main" onclick="addAsset()">내 자산으로 등록 (+100P 필요)</button>
         </div>
+        <h3>보유 중인 자산 목록</h3>
+        <div id="asset-list" class="card"></div>
+        <button class="btn" onclick="goBack()">돌아가기</button>
     </div>
 
-    <div id="scr-transfer" class="screen">
-        <h2>수표 발행 (송금)</h2>
-        <div style="background:white; padding:20px; border-radius:24px;">
-            <input type="number" id="tx-amount" class="input-field" placeholder="보낼 금액">
-            <input type="text" id="tx-msg" class="input-field" placeholder="메시지 입력">
-            <input type="password" id="tx-pin" class="input-field" placeholder="보안 PIN (4자리)" maxlength="4" inputmode="numeric">
+    <div id="scr-gift" class="screen">
+        <h3>선물 명세표 발행</h3>
+        <div class="card">
+            <p id="gift-target-name" style="font-weight:bold; color:var(--primary);"></p>
+            <textarea id="gift-msg" class="input-box" placeholder="친구에게 보낼 따뜻한 한마디"></textarea>
+            <p style="font-size:12px; color:red;">* 발행 시 내 목록에서 자산이 즉시 인출됩니다.</p>
         </div>
-        <button class="btn btn-primary" style="margin-top:20px;" onclick="generateCheck()">비대면 수표 생성</button>
-        <div id="check-output" style="display:none; margin-top:20px; background:#eee; padding:15px; border-radius:15px; word-break:break-all; font-family:monospace; font-size:12px;"></div>
-        <button onclick="goBack()" style="border:none; background:none; margin-top:15px; color:var(--grey);">취소하기</button>
+        <button class="btn btn-main" onclick="generateGiftCode()">선물 명세표 코드 생성</button>
+        <div id="gift-code-res" class="card" style="display:none; background:#f9f9f9; word-break:break-all; font-family:monospace;"></div>
+        <button class="btn" onclick="goBack()">취소</button>
     </div>
 
-    <div id="scr-setup" class="screen">
-        <h2>시스템 설정</h2>
-        <div style="background:white; padding:20px; border-radius:24px;">
-            <label style="font-size:12px; color:var(--grey);">사용자 이름</label>
-            <input type="text" id="user-name" class="input-field">
-            <label style="font-size:12px; color:var(--grey);">신규 PIN 설정</label>
-            <input type="password" id="user-pin" class="input-field" placeholder="****" maxlength="4">
+    <div id="scr-receive" class="screen">
+        <h3>선물 받기</h3>
+        <div class="card">
+            <input type="text" id="inbox-code" class="input-box" placeholder="전달받은 코드를 입력하세요">
         </div>
-        <button class="btn btn-primary" style="margin-top:20px;" onclick="saveSettings()">설정 저장</button>
-        <button class="btn" style="color:var(--red);" onclick="factoryReset()">⚠️ 데이터 초기화</button>
-        <button onclick="goBack()" style="border:none; background:none; margin-top:15px; color:var(--grey);">뒤로가기</button>
+        <button class="btn btn-main" onclick="claimGift()">자산 보관함에 추가</button>
+        <button class="btn" onclick="goBack()">뒤로가기</button>
     </div>
+</div>
 
-    </div>
-
-<div id="ad-box">
-    <button class="ad-btn" onclick="watchAd()">📺 보상형 광고 보고 1,000P 받기</button>
-    <div style="width:100%; display:flex; justify-content:center;">
+<div id="ad-bottom">
+    <button onclick="adReward()" style="background: #FFD700; border:none; padding:5px 15px; border-radius:20px; font-weight:bold; margin-bottom:5px; cursor:pointer;">⚡ 광고 보고 500P 충전</button>
+    <div style="display:flex; justify-content:center;">
         <iframe data-aa='2425929' src='//acceptable.a-ads.com/2425929/?size=Adaptive' style='border:0; padding:0; width:320px; height:50px; overflow:hidden;'></iframe>
     </div>
 </div>
 
 <script>
-    // 1. 초기 데이터 로드
-    let data = JSON.parse(localStorage.getItem('hb_data')) || {
-        p: 1000, 
-        name: "사용자", 
-        pin: "0000", 
-        lastCheck: "", 
-        streak: 0, 
-        logs: []
+    let db = JSON.parse(localStorage.getItem('gift_bank_db')) || {
+        p: 500,
+        assets: [] // {id, name, val}
     };
 
-    const tiers = [
-        { name: "BRONZE", min: 0, rate: 0.00001 },
-        { name: "SILVER", min: 10000, rate: 0.00005 },
-        { name: "GOLD", min: 100000, rate: 0.0001 },
-        { name: "VIP", min: 1000000, rate: 0.0005 }
-    ];
+    function save() { localStorage.setItem('gift_bank_db', JSON.stringify(db)); render(); }
 
-    function save() { localStorage.setItem('hb_data', JSON.stringify(data)); updateUI(); }
-
-    function updateUI() {
-        document.getElementById('display-p').innerText = Math.floor(data.p).toLocaleString() + " P";
-        document.getElementById('user-name').value = data.name;
+    function render() {
+        document.getElementById('main-p').innerText = db.p.toLocaleString() + " P";
         
-        // 티어 계산
-        let currentTier = tiers[0];
-        tiers.forEach(t => { if(data.p >= t.min) currentTier = t; });
-        const tierBadge = document.getElementById('user-tier');
-        tierBadge.innerText = currentTier.name;
-        tierBadge.style.color = currentTier.name === "VIP" ? "var(--gold)" : "white";
+        // 메인 퀵 자산
+        const qa = document.getElementById('quick-assets');
+        qa.innerHTML = db.assets.length ? "" : "<p style='color:#999;'>등록된 자산이 없습니다.</p>";
+        db.assets.forEach((a, i) => {
+            qa.innerHTML += `<div class="card" onclick="prepareGift(${i})"><b>${a.name}</b><br><small style="color:var(--primary);">선물하기 (인출) ></small></div>`;
+        });
+
+        // 인벤토리 목록
+        const al = document.getElementById('asset-list');
+        al.innerHTML = db.assets.map((a, i) => `
+            <div class="asset-item">
+                <span>${a.name}</span>
+                <button onclick="removeAsset(${i})" style="color:red; border:none; background:none;">삭제</button>
+            </div>
+        `).join('');
     }
 
-    // 2. 실시간 이자 시스템 (복리)
-    setInterval(() => {
-        let currentRate = 0.00001;
-        tiers.forEach(t => { if(data.p >= t.min) currentRate = t.rate; });
-        data.p += data.p * currentRate;
-        save();
-    }, 5000);
+    // 자산 등록
+    function addAsset() {
+        const name = document.getElementById('new-asset-name').value;
+        const val = document.getElementById('new-asset-val').value;
+        if(!name || !val) return alert("내용을 입력해주세요.");
+        if(db.p < 100) return alert("등록 수수료 100P가 필요합니다. 광고를 봐주세요!");
 
-    // 3. 광고 보상 기능
-    function watchAd() {
-        if(confirm("광고를 확인하시겠습니까? 시청 완료 시 1,000P가 지급됩니다.")) {
-            data.p += 1000;
-            data.logs.unshift({t: "광고보상", a: 1000, d: new Date().toLocaleTimeString()});
+        db.p -= 100;
+        db.assets.push({ id: Date.now(), name, val });
+        document.getElementById('new-asset-name').value = "";
+        document.getElementById('new-asset-val').value = "";
+        save();
+        alert("자산이 안전하게 등록되었습니다.");
+    }
+
+    // 선물하기 준비
+    let selectedAssetIdx = -1;
+    function prepareGift(i) {
+        selectedAssetIdx = i;
+        document.getElementById('gift-target-name').innerText = `[${db.assets[i].name}] 선물하기`;
+        document.getElementById('gift-code-res').style.display = 'none';
+        move('gift');
+    }
+
+    // 명세표 코드 생성 (인출)
+    function generateGiftCode() {
+        const asset = db.assets[selectedAssetIdx];
+        const msg = document.getElementById('gift-msg').value;
+        
+        const giftObj = {
+            type: "HAPPY_GIFT_V2",
+            name: asset.name,
+            val: asset.val,
+            msg: msg,
+            salt: Math.random().toString(36).substr(2, 5)
+        };
+
+        const code = btoa(unescape(encodeURIComponent(JSON.stringify(giftObj))));
+        
+        // 인출 처리
+        db.assets.splice(selectedAssetIdx, 1);
+        save();
+
+        const res = document.getElementById('gift-code-res');
+        res.style.display = 'block';
+        res.innerText = code;
+        
+        alert("명세표 코드가 생성되었습니다! 아래 코드를 복사해서 전달하세요.");
+        speak("선물 명세표 인출이 완료되었습니다.");
+    }
+
+    // 선물 받기
+    function claimGift() {
+        const code = document.getElementById('inbox-code').value;
+        try {
+            const data = JSON.parse(decodeURIComponent(escape(atob(code))));
+            if(data.type !== "HAPPY_GIFT_V2") throw new Error();
+
+            db.assets.push({ id: Date.now(), name: data.name, val: data.val });
+            document.getElementById('inbox-code').value = "";
             save();
-            speak("광고 보상 천 포인트가 지급되었습니다.");
+            alert(`🎁 [${data.name}] 선물이 보관함에 도착했습니다!\n메시지: ${data.msg}`);
+            move('main');
+        } catch(e) {
+            alert("유효하지 않은 선물 코드입니다.");
         }
     }
 
-    // 4. 출석 체크 기능
-    function checkAttendance() {
-        const today = new Date().toLocaleDateString();
-        if(data.lastCheck === today) return alert("이미 오늘 출석체크를 완료했습니다!");
-        
-        const reward = 500 + (data.streak * 100);
-        data.p += reward;
-        data.streak = (data.lastCheck === new Date(Date.now() - 86400000).toLocaleDateString()) ? data.streak + 1 : 1;
-        data.lastCheck = today;
-        data.logs.unshift({t: "출석보상", a: reward, d: today});
-        save();
-        alert(`출석 완료! ${reward}P가 지급되었습니다. (연속 ${data.streak}일째)`);
-    }
-
-    // 5. 보안 수표 발행 (PIN 확인 포함)
-    function generateCheck() {
-        const amt = parseInt(document.getElementById('tx-amount').value);
-        const pin = document.getElementById('tx-pin').value;
-        if(pin !== data.pin) return alert("PIN 번호가 일치하지 않습니다!");
-        if(amt > data.p) return alert("잔액이 부족합니다.");
-
-        data.p -= amt;
-        const checkData = btoa(unescape(encodeURIComponent(JSON.stringify({
-            from: data.name,
-            amt: amt,
-            msg: document.getElementById('tx-msg').value,
-            id: Math.random().toString(36).substr(2, 5)
-        }))));
-
-        const out = document.getElementById('check-output');
-        out.style.display = "block";
-        out.innerText = checkData;
-        data.logs.unshift({t: "수표발급", a: -amt, d: new Date().toLocaleTimeString()});
-        save();
-        speak("수표가 생성되었습니다. 코드를 복사하세요.");
-    }
-
-    // 기타 네비게이션
+    // 유틸리티
     function move(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('scr-'+id).classList.add('active');
     }
     function goBack() { move('main'); }
-    function saveSettings() {
-        data.name = document.getElementById('user-name').value;
-        if(document.getElementById('user-pin').value) data.pin = document.getElementById('user-pin').value;
-        save();
-        alert("설정이 저장되었습니다.");
-        goBack();
-    }
-    function factoryReset() { if(confirm("모든 데이터가 사라집니다!")) { localStorage.clear(); location.reload(); } }
+    function adReward() { db.p += 500; save(); speak("오백 포인트 충전 완료!"); }
+    function removeAsset(i) { if(confirm("삭제하시겠습니까?")) { db.assets.splice(i,1); save(); } }
+    function initAudio() { /* TTS용 */ }
     function speak(t) { window.speechSynthesis.cancel(); const m = new SpeechSynthesisUtterance(t); m.lang='ko-KR'; window.speechSynthesis.speak(m); }
-    function initAudio() { /* 필요시 구현 */ }
 
-    updateUI();
+    render();
 </script>
 </body>
 </html>
