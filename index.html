@@ -3,185 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HAPPY GIFT BANK</title>
+    <title>HAPPY BANK 9.0 - Pro</title>
     <style>
-        :root { --primary: #0054FF; --bg: #F4F6FA; --card: #FFFFFF; --text: #1A1F27; }
-        body, html { margin: 0; padding: 0; background: var(--bg); font-family: sans-serif; overflow-x: hidden; }
-        .screen { display: none; padding: 20px; box-sizing: border-box; min-height: 100vh; padding-bottom: 120px; }
+        :root { --primary: #0054FF; --bg: #F0F3F7; --card: #FFFFFF; --accent: #FF3B30; --gold: #FFD700; }
+        body, html { margin: 0; padding: 0; background: var(--bg); font-family: 'Pretendard', sans-serif; color: #333; }
+        .app { max-width: 500px; margin: 0 auto; min-height: 100vh; position: relative; }
+        .screen { display: none; padding: 20px; padding-bottom: 140px; }
         .screen.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .card { background: var(--card); border-radius: 20px; padding: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        .btn { width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 16px; }
-        .btn-main { background: var(--primary); color: white; }
-        .input-box { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        .asset-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0; }
-        #ad-bottom { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #ddd; padding: 10px 0; text-align: center; z-index: 1000; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .card { background: var(--card); border-radius: 24px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .btn { width: 100%; padding: 16px; border-radius: 16px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: #E8F0FF; color: var(--primary); }
+        .input-box { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #E5E8EB; border-radius: 12px; box-sizing: border-box; outline: none; }
+        
+        /* 로또/명세표 스타일 */
+        .lotto-ball { display: inline-block; width: 35px; height: 35px; border-radius: 50%; background: var(--gold); color: #000; text-align: center; line-height: 35px; margin: 3px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .receipt { background: white; padding: 20px; border: 1px dashed #ccc; font-family: monospace; position: relative; }
+        .receipt::after { content: ''; position: absolute; left: 0; bottom: -10px; width: 100%; height: 10px; background-image: linear-gradient(-45deg, transparent 5px, white 5px), linear-gradient(45deg, transparent 5px, white 5px); background-size: 10px 10px; }
+        
+        #ad-layer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #ddd; padding: 15px 0; text-align: center; z-index: 9999; }
     </style>
 </head>
-<body onclick="initAudio()">
+<body>
 
-<div id="app">
+<div class="app">
     <div id="scr-main" class="screen active">
-        <h2 style="color: var(--primary);">🎁 MY GIFT BANK</h2>
-        <div class="card" style="background: linear-gradient(135deg, #0054FF, #6699FF); color: white;">
-            <p style="margin:0; opacity:0.8;">보유 포인트 (수수료용)</p>
-            <h1 id="main-p">0 P</h1>
+        <h2 style="color: var(--primary); display: flex; justify-content: space-between;">
+            HAPPY BANK <span>💎</span>
+        </h2>
+        <div class="card" style="background: linear-gradient(135deg, #0054FF, #00C2FF); color: white;">
+            <p style="margin:0; opacity:0.8;">사용 가능한 포인트</p>
+            <h1 id="main-p" style="font-size: 36px; margin: 10px 0;">0 P</h1>
+            <small id="user-tier">티어 분석 중...</small>
         </div>
         
-        <button class="btn btn-main" onclick="move('inventory')">📦 내 자산 보관함</button>
-        <button class="btn" style="background: #E8F0FF; color: var(--primary);" onclick="move('receive')">📥 선물 코드 등록</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button class="btn btn-secondary" onclick="move('inventory')">📦 자산 등록</button>
+            <button class="btn btn-secondary" onclick="move('lotto')">🎰 로또 추천</button>
+        </div>
+        <button class="btn btn-primary" style="margin-top:10px;" onclick="move('receive')">📥 선물 코드/QR 등록</button>
         
-        <h3 style="margin-top:25px;">빠른 선물하기</h3>
+        <h3 style="margin-top:25px;">보유 자산 목록</h3>
         <div id="quick-assets"></div>
     </div>
 
     <div id="scr-inventory" class="screen">
-        <h3>자산 등록하기</h3>
+        <h3>자산/링크 등록</h3>
         <div class="card">
-            <input type="text" id="new-asset-name" class="input-box" placeholder="자산 이름 (예: 커피 쿠폰)">
-            <input type="text" id="new-asset-val" class="input-box" placeholder="상세 내용 (핀번호 또는 메시지)">
-            <button class="btn btn-main" onclick="addAsset()">내 자산으로 등록 (+100P 필요)</button>
+            <input type="text" id="new-name" class="input-box" placeholder="상품명 (예: 스타벅스)">
+            <input type="text" id="new-link" class="input-box" placeholder="링크 주소 (URL) 또는 쿠폰번호">
+            <p style="font-size:12px; color:#666;">* 링크를 넣으면 자동으로 QR코드가 생성됩니다.</p>
+            <button class="btn btn-primary" onclick="addAsset()">자산 등록 (100P 소모)</button>
         </div>
-        <h3>보유 중인 자산 목록</h3>
-        <div id="asset-list" class="card"></div>
+        <button class="btn" onclick="goBack()">돌아가기</button>
+    </div>
+
+    <div id="scr-lotto" class="screen">
+        <h3>행운의 로또 번호</h3>
+        <div class="card" style="text-align: center;">
+            <p>500P를 사용하여 번호를 생성합니다.</p>
+            <div id="lotto-res" style="margin: 20px 0;"></div>
+            <button class="btn btn-primary" onclick="generateLotto()">번호 생성하기</button>
+        </div>
         <button class="btn" onclick="goBack()">돌아가기</button>
     </div>
 
     <div id="scr-gift" class="screen">
         <h3>선물 명세표 발행</h3>
-        <div class="card">
-            <p id="gift-target-name" style="font-weight:bold; color:var(--primary);"></p>
-            <textarea id="gift-msg" class="input-box" placeholder="친구에게 보낼 따뜻한 한마디"></textarea>
-            <p style="font-size:12px; color:red;">* 발행 시 내 목록에서 자산이 즉시 인출됩니다.</p>
+        <div id="receipt-area" class="receipt card">
+            <h2 style="text-align:center;">GIFT RECEIPT</h2>
+            <hr>
+            <p>품명: <span id="r-name"></span></p>
+            <p>메시지: <span id="r-msg"></span></p>
+            <div id="qr-area" style="text-align:center; margin:15px 0;"></div>
+            <p style="font-size:10px; word-break:break-all;">CODE: <span id="r-code"></span></p>
+            <hr>
+            <p style="text-align:center; font-size:12px;">THANK YOU!</p>
         </div>
-        <button class="btn btn-main" onclick="generateGiftCode()">선물 명세표 코드 생성</button>
-        <div id="gift-code-res" class="card" style="display:none; background:#f9f9f9; word-break:break-all; font-family:monospace;"></div>
-        <button class="btn" onclick="goBack()">취소</button>
+        <button class="btn btn-primary" onclick="copyReceipt()">명세표 코드 복사</button>
+        <button class="btn" onclick="goBack()">완료</button>
     </div>
 
     <div id="scr-receive" class="screen">
         <h3>선물 받기</h3>
         <div class="card">
-            <input type="text" id="inbox-code" class="input-box" placeholder="전달받은 코드를 입력하세요">
+            <input type="text" id="claim-code" class="input-box" placeholder="복사한 코드를 입력하세요">
+            <button class="btn btn-primary" onclick="claimGift()">자산 등록하기</button>
         </div>
-        <button class="btn btn-main" onclick="claimGift()">자산 보관함에 추가</button>
-        <button class="btn" onclick="goBack()">뒤로가기</button>
+        <button class="btn" onclick="goBack()">돌아가기</button>
     </div>
 </div>
 
-<div id="ad-bottom">
-    <button onclick="adReward()" style="background: #FFD700; border:none; padding:5px 15px; border-radius:20px; font-weight:bold; margin-bottom:5px; cursor:pointer;">⚡ 광고 보고 500P 충전</button>
-    <div style="display:flex; justify-content:center;">
+<div id="ad-layer">
+    <div id="ad-timer" style="font-size:11px; color:red; margin-bottom:5px;"></div>
+    <button id="ad-btn" class="btn" style="width:auto; padding:8px 20px; background:var(--gold); display:inline-block;" onclick="watchAd()">📺 광고 보고 포인트 받기</button>
+    <div style="display:flex; justify-content:center; margin-top:10px;">
         <iframe data-aa='2425929' src='//acceptable.a-ads.com/2425929/?size=Adaptive' style='border:0; padding:0; width:320px; height:50px; overflow:hidden;'></iframe>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('gift_bank_db')) || {
-        p: 500,
-        assets: [] // {id, name, val}
-    };
+    let db = JSON.parse(localStorage.getItem('happy_bank_v9')) || { p: 1000, assets: [] };
+    let isAdWatching = false;
 
-    function save() { localStorage.setItem('gift_bank_db', JSON.stringify(db)); render(); }
+    function save() { 
+        localStorage.setItem('happy_bank_v9', JSON.stringify(db)); 
+        render(); 
+    }
 
     function render() {
-        document.getElementById('main-p').innerText = db.p.toLocaleString() + " P";
-        
-        // 메인 퀵 자산
+        document.getElementById('main-p').innerText = Math.floor(db.p).toLocaleString() + " P";
         const qa = document.getElementById('quick-assets');
-        qa.innerHTML = db.assets.length ? "" : "<p style='color:#999;'>등록된 자산이 없습니다.</p>";
+        qa.innerHTML = db.assets.length ? "" : "<p style='text-align:center; color:#999;'>보유한 자산이 없습니다.</p>";
         db.assets.forEach((a, i) => {
-            qa.innerHTML += `<div class="card" onclick="prepareGift(${i})"><b>${a.name}</b><br><small style="color:var(--primary);">선물하기 (인출) ></small></div>`;
+            qa.innerHTML += `
+                <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div><b>${a.name}</b><br><small>${a.val.substring(0,15)}...</small></div>
+                    <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="issueGift(${i})">선물</button>
+                </div>`;
         });
-
-        // 인벤토리 목록
-        const al = document.getElementById('asset-list');
-        al.innerHTML = db.assets.map((a, i) => `
-            <div class="asset-item">
-                <span>${a.name}</span>
-                <button onclick="removeAsset(${i})" style="color:red; border:none; background:none;">삭제</button>
-            </div>
-        `).join('');
     }
 
-    // 자산 등록
+    // 1. 광고 어뷰징 방지 (실제 대기 시간 필요)
+    function watchAd() {
+        if(isAdWatching) return;
+        isAdWatching = true;
+        let count = 5;
+        const btn = document.getElementById('ad-btn');
+        const timer = document.getElementById('ad-timer');
+        
+        const interval = setInterval(() => {
+            btn.innerText = `시청 중... (${count}s)`;
+            count--;
+            if(count < 0) {
+                clearInterval(interval);
+                db.p += 1000;
+                save();
+                btn.innerText = "📺 광고 보고 포인트 받기";
+                timer.innerText = "1,000P 적립 완료!";
+                isAdWatching = false;
+                alert("포인트가 지급되었습니다!");
+            }
+        }, 1000);
+    }
+
+    // 2. 자산 및 링크 등록 (QR 대응)
     function addAsset() {
-        const name = document.getElementById('new-asset-name').value;
-        const val = document.getElementById('new-asset-val').value;
-        if(!name || !val) return alert("내용을 입력해주세요.");
-        if(db.p < 100) return alert("등록 수수료 100P가 필요합니다. 광고를 봐주세요!");
+        const name = document.getElementById('new-name').value;
+        const val = document.getElementById('new-link').value;
+        if(!name || !val) return alert("내용을 입력하세요.");
+        if(db.p < 100) return alert("포인트가 부족합니다.");
 
         db.p -= 100;
-        db.assets.push({ id: Date.now(), name, val });
-        document.getElementById('new-asset-name').value = "";
-        document.getElementById('new-asset-val').value = "";
+        db.assets.push({ name, val });
         save();
-        alert("자산이 안전하게 등록되었습니다.");
+        alert("등록 완료!");
+        goBack();
     }
 
-    // 선물하기 준비
-    let selectedAssetIdx = -1;
-    function prepareGift(i) {
-        selectedAssetIdx = i;
-        document.getElementById('gift-target-name').innerText = `[${db.assets[i].name}] 선물하기`;
-        document.getElementById('gift-code-res').style.display = 'none';
+    // 3. 로또 번호 생성
+    function generateLotto() {
+        if(db.p < 500) return alert("500P가 필요합니다.");
+        db.p -= 500;
+        
+        let nums = [];
+        while(nums.length < 6) {
+            let r = Math.floor(Math.random() * 45) + 1;
+            if(!nums.includes(r)) nums.push(r);
+        }
+        nums.sort((a,b) => a-b);
+        
+        const resDiv = document.getElementById('lotto-res');
+        resDiv.innerHTML = nums.map(n => `<span class="lotto-ball">${n}</span>`).join('');
+        save();
+    }
+
+    // 4. 명세표 인출 및 QR 생성
+    function issueGift(idx) {
+        const asset = db.assets[idx];
+        const msg = prompt("친구에게 보낼 메시지:");
+        
+        document.getElementById('r-name').innerText = asset.name;
+        document.getElementById('r-msg').innerText = msg || "선물이 도착했습니다!";
+        
+        // QR API 활용 (링크인 경우)
+        const qrArea = document.getElementById('qr-area');
+        if(asset.val.includes('http')) {
+            qrArea.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(asset.val)}" alt="QR">`;
+        } else {
+            qrArea.innerHTML = "<b>[바코드/코드 형태]</b>";
+        }
+
+        const giftData = btoa(unescape(encodeURIComponent(JSON.stringify({
+            n: asset.name, v: asset.val, m: msg, ver: "9.0"
+        }))));
+        document.getElementById('r-code').innerText = giftData;
+        
+        db.assets.splice(idx, 1); // 인출 처리
+        save();
         move('gift');
     }
 
-    // 명세표 코드 생성 (인출)
-    function generateGiftCode() {
-        const asset = db.assets[selectedAssetIdx];
-        const msg = document.getElementById('gift-msg').value;
-        
-        const giftObj = {
-            type: "HAPPY_GIFT_V2",
-            name: asset.name,
-            val: asset.val,
-            msg: msg,
-            salt: Math.random().toString(36).substr(2, 5)
-        };
-
-        const code = btoa(unescape(encodeURIComponent(JSON.stringify(giftObj))));
-        
-        // 인출 처리
-        db.assets.splice(selectedAssetIdx, 1);
-        save();
-
-        const res = document.getElementById('gift-code-res');
-        res.style.display = 'block';
-        res.innerText = code;
-        
-        alert("명세표 코드가 생성되었습니다! 아래 코드를 복사해서 전달하세요.");
-        speak("선물 명세표 인출이 완료되었습니다.");
-    }
-
-    // 선물 받기
+    // 5. 선물 받기 (코드 해석)
     function claimGift() {
-        const code = document.getElementById('inbox-code').value;
+        const code = document.getElementById('claim-code').value;
         try {
             const data = JSON.parse(decodeURIComponent(escape(atob(code))));
-            if(data.type !== "HAPPY_GIFT_V2") throw new Error();
-
-            db.assets.push({ id: Date.now(), name: data.name, val: data.val });
-            document.getElementById('inbox-code').value = "";
+            db.assets.push({ name: data.n, val: data.v });
             save();
-            alert(`🎁 [${data.name}] 선물이 보관함에 도착했습니다!\n메시지: ${data.msg}`);
-            move('main');
-        } catch(e) {
-            alert("유효하지 않은 선물 코드입니다.");
-        }
+            alert(`[${data.n}] 자산이 보관함에 등록되었습니다!\n메시지: ${data.m}`);
+            goBack();
+        } catch(e) { alert("잘못된 명세표 코드입니다."); }
     }
 
-    // 유틸리티
+    // 공통 함수
     function move(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('scr-'+id).classList.add('active');
     }
     function goBack() { move('main'); }
-    function adReward() { db.p += 500; save(); speak("오백 포인트 충전 완료!"); }
-    function removeAsset(i) { if(confirm("삭제하시겠습니까?")) { db.assets.splice(i,1); save(); } }
-    function initAudio() { /* TTS용 */ }
-    function speak(t) { window.speechSynthesis.cancel(); const m = new SpeechSynthesisUtterance(t); m.lang='ko-KR'; window.speechSynthesis.speak(m); }
+    function copyReceipt() {
+        const code = document.getElementById('r-code').innerText;
+        navigator.clipboard.writeText(code).then(() => alert("명세표 코드가 복사되었습니다. 친구에게 전달하세요!"));
+    }
 
     render();
 </script>
